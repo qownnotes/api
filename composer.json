@@ -1,6 +1,6 @@
 {
     "type": "project",
-    "license": "proprietary",
+    "license": "AGPL-3.0-or-later",
     "require": {
         "php": ">=7.2.5",
         "ext-ctype": "*",
@@ -11,6 +11,9 @@
         "doctrine/doctrine-bundle": "^2.1",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.7",
+        "guzzlehttp/guzzle": "^7.0.1",
+        "kevinrob/guzzle-cache-middleware": "v3.3.1",
+        "league/uri": "^6.3.0",
         "nelmio/cors-bundle": "^2.1",
         "phpdocumentor/reflection-docblock": "^5.2",
         "symfony/asset": "5.1.*",
@@ -25,7 +28,8 @@
         "symfony/serializer": "5.1.*",
         "symfony/twig-bundle": "5.1.*",
         "symfony/validator": "5.1.*",
-        "symfony/yaml": "5.1.*"
+        "symfony/yaml": "5.1.*",
+        "ext-json": "*"
     },
     "require-dev": {
     },
