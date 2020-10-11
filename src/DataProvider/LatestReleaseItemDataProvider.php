@@ -43,6 +43,7 @@ final class LatestReleaseItemDataProvider implements ItemDataProviderInterface, 
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?LatestRelease
     {
-        return $this->api->fetchLatestRelease($id);
+        $filters = $context['filters'] ?? [];
+        return $this->api->fetchLatestRelease($id, $filters);
     }
 }

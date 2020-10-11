@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *       "parameters"={
  *         {"name"="id", "in"="path", "description"="Type of release [linux, windows, macos]", "type"="string", "enum"={"linux", "windows", "macos"}, "example"="linux"},
  *         {"name"="version", "in"="query", "description"="Version of the application", "type"="string", "example"="20.10.3"},
- *         {"name"="debug", "in"="query", "description"="Debugging release? [0, 1]", "type"="number", "enum"={"0", "1"}, "example"="0"},
+ *         {"name"="debug", "in"="query", "description"="Debugging release? [0, 1]", "type"="number", "enum"={"0", "1"}, "example"="1"},
  *     }}},
  *   },
  *   iri="http://www.qownnotes.org/Release",
@@ -70,6 +70,13 @@ class LatestRelease
      * @Groups({"LatestRelease:output"})
      */
     private $releaseChangesHtml;
+
+    /**
+     * @var bool
+     * @ApiProperty(iri="http://schema.org/Boolean")
+     * @Groups({"LatestRelease:output"})
+     */
+    private $needUpdate;
 
 
     public function setIdentifier(string $identifier): self
@@ -128,6 +135,18 @@ class LatestRelease
     public function setReleaseChangesHtml(string $releaseChangesHtml): self
     {
         $this->releaseChangesHtml = $releaseChangesHtml;
+
+        return $this;
+    }
+
+    public function getNeedUpdate(): ?bool
+    {
+        return $this->needUpdate;
+    }
+
+    public function setNeedUpdate(bool $needUpdate): self
+    {
+        $this->needUpdate = $needUpdate;
 
         return $this;
     }

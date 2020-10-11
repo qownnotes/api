@@ -94,11 +94,11 @@ class ReleaseApi
     }
 
     /**
-     * @param string $name
+     * @param array $filters
      * @return ArrayCollection|LatestRelease[]
-     * @throws UnprocessableEntityHttpException
+     * @throws \Exception
      */
-    public function fetchLatestReleases(): ArrayCollection
+    public function fetchLatestReleases(array $filters = []): ArrayCollection
     {
         /** @var ArrayCollection<int,LatestRelease> $collection */
         $collection = new ArrayCollection();
@@ -111,7 +111,7 @@ class ReleaseApi
 
         $latestReleaseData = $releaseJsonData[0];
         $tagName = $latestReleaseData["tag_name"];
-        $version = $str = substr($tagName, 1);;
+        $latestVersion = $str = substr($tagName, 1);;
         $assets = $latestReleaseData["assets"];
 
         $nameHash = [
@@ -119,6 +119,13 @@ class ReleaseApi
             "QOwnNotes.zip" => "windows",
             "QOwnNotes.dmg" => "macos",
         ];
+
+        $version = $filters["version"] ?? "";
+        $needUpdate = version_compare( $version, $latestVersion, "<" );
+
+        $releaseChangesHtml = ($version !== "" && $needUpdate) ?
+            $this->getChangeLogChangesFromGitHubSinceVersion($tagName, $version) :
+            $this->getChangeLogChangesFromGitHubForVersion($tagName, $latestVersion);
 
         foreach ($assets as $asset) {
             $name = $asset["name"];
@@ -129,15 +136,13 @@ class ReleaseApi
 
             $id = $nameHash[$name];
 
-            // TODO: Get releaseChangesHtml
-            $releaseChangesHtml = "Todo";
-
             $lastRelease = new LatestRelease();
             $lastRelease->setIdentifier($id);
             $lastRelease->setUrl($asset["browser_download_url"]);
-            $lastRelease->setVersion($version);
+            $lastRelease->setVersion($latestVersion);
             $lastRelease->setDateCreated(new \DateTime($asset["created_at"]));
             $lastRelease->setReleaseChangesHtml($releaseChangesHtml);
+            $lastRelease->setNeedUpdate($needUpdate);
             $collection->add($lastRelease);
         }
 
@@ -146,12 +151,14 @@ class ReleaseApi
 
     /**
      * @param string $id
+     * @param array $filters
      * @return LatestRelease
      * @throws UnprocessableEntityHttpException
      * @throws NotFoundHttpException
+     * @throws \Exception
      */
-    public function fetchLatestRelease(string $id): LatestRelease {
-        $latestReleases = $this->fetchLatestReleases();
+    public function fetchLatestRelease(string $id, array $filters): LatestRelease {
+        $latestReleases = $this->fetchLatestReleases($filters);
 
         foreach($latestReleases as $latestRelease) {
             if ($latestRelease->getIdentifier() === $id) {
@@ -166,7 +173,6 @@ class ReleaseApi
         $client = $this->getReleaseClient();
 
         try {
-            // e.g. https://campusqr-dev.tugraz.at/location/list
             $url = $this->urls->getReleasesRequestUrl("pbek", "QOwnNotes");
 
             $options = [
@@ -230,5 +236,79 @@ class ReleaseApi
         }
 
         return $result;
+    }
+
+    /**
+     * Parses the change log file CHANGELOG.md in a repository on GitHub at a certain tag
+     * and returns the text for a certain version string
+     *
+     * @param string $tag
+     * @param string $versionString
+     * @return string the changes text
+     */
+    private function getChangeLogChangesFromGitHubForVersion(string $tag, string $versionString)
+    {
+        // load the change log file
+        $changeLogData = $this->fetchChangeLog($tag);
+
+        $matches = [];
+        // parse the changelog
+        preg_match('/## '.$versionString.'\n(.+?)\n\n## [\d.]+/sim', $changeLogData, $matches);
+
+        return isset($matches[1]) ? trim($matches[1]) : "";
+    }
+
+    /**
+     * Fetches a file in a repository on GitHub from a certain branch / tag
+     *
+     * @param string $identifier
+     * @param string $fileName
+     * @return string the changes text
+     */
+    private function fetchRawFileFromGitHub(string $identifier, string $fileName)
+    {
+        $url = "https://raw.githubusercontent.com/pbek/QOwnNotes/$identifier/$fileName";
+
+        // load the file
+        return file_get_contents($url);
+    }
+
+
+    /**
+     * Parses the change log file CHANGELOG.md in a repository on GitHub at a certain tag
+     * and returns the text above the version string
+     *
+     * @param string $repository
+     * @param string $tag
+     * @param string $versionString
+     * @return string the changes text
+     */
+    private function getChangeLogChangesFromGitHubSinceVersion(string $tag, string $versionString)
+    {
+        $changeLogData = $this->fetchChangeLog($tag);
+
+        // get the text above the version string
+        $dataList = explode("## $versionString\n", $changeLogData);
+
+        return trim($dataList[0]);
+    }
+
+    private function fetchChangeLog($tag): string {
+        $client = $this->getReleaseClient();
+
+        try {
+            $url = $this->urls->getChangeLogUrl($tag);
+
+            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
+            $response = $client->request('GET', $url);
+
+            return $response->getBody()->getContents();
+        } catch (GuzzleException $e) {
+            throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
+                $e->getMessage()));
+        } catch (\Exception|UriException $e) {
+            throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
+                $e->getMessage()));
+        }
     }
 }

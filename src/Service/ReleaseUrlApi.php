@@ -26,4 +26,18 @@ class ReleaseUrlApi
                 'repo' => $repo,
             ]);
     }
+
+    /**
+     * @param string $tag
+     * @return string
+     * @throws UriException
+     */
+    public function getChangeLogUrl(string $tag): string
+    {
+        $uriTemplate = new UriTemplate('https://raw.githubusercontent.com/pbek/QOwnNotes/{tag}/CHANGELOG.md');
+
+        return (string) $uriTemplate->expand([
+                'tag' => $tag,
+            ]);
+    }
 }
