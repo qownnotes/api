@@ -12,5 +12,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: cd docker && ./run-tests
+    - run: cd docker && docker-compose build php-fpm && ./run-tests
     - run: docker build .
