@@ -2,7 +2,6 @@ FROM composer AS composer
 
 # copying the source directory and install the dependencies with composer
 COPY . /app
-COPY ./public /app/html
 
 # run composer install to install the dependencies
 RUN composer install \
@@ -16,3 +15,4 @@ USER root
 RUN apk --no-cache add php7-tokenizer
 USER nobody
 COPY --chown=nginx --from=composer /app /var/www
+COPY --chown=nginx --from=composer /app/public /var/www/html
