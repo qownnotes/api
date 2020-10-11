@@ -18,18 +18,18 @@ RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
         git \
         php-apcu \
         php-apcu-bc \
-        php7.4-cli \
-        php7.4-curl \
-        php7.4-soap \
-        php7.4-json \
-        php7.4-mbstring \
-        php7.4-opcache \
-        php7.4-readline \
-        php7.4-xml \
-        php7.4-zip \
-        php7.4-fpm \
-        php7.4-gmp \
-        php7.4-xdebug \
+        php7.3-cli \
+        php7.3-curl \
+        php7.3-soap \
+        php7.3-json \
+        php7.3-mbstring \
+        php7.3-opcache \
+        php7.3-readline \
+        php7.3-xml \
+        php7.3-zip \
+        php7.3-fpm \
+        php7.3-gmp \
+        php7.3-xdebug \
         composer \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -40,6 +40,6 @@ RUN useradd -u 1000 -ms /bin/bash user
 RUN echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER user
 
-CMD ["/usr/sbin/php-fpm7.4", "-O" ]
+CMD ["/usr/sbin/php-fpm7.3", "-O" ]
 EXPOSE 9000
 WORKDIR "/application"

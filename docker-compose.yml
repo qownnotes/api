@@ -1,0 +1,9 @@
+version: "3.1"
+
+services:
+  web:
+    image: img-qownnotes-api
+    build: .
+    container_name: qownnotes-api
+    ports:
+      - "8080:8080"
