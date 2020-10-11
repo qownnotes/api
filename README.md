@@ -1,3 +1,3 @@
-# QOwnNotes Web API
+# [QOwnNotes Web API](https://github.com/qownnotes/api)
 
 
