@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker-compose exec php-fpm env SYMFONY_PHPUNIT_VERSION=8 vendor/bin/simple-phpunit "$@"
+docker-compose run --rm php-fpm env SYMFONY_PHPUNIT_VERSION=8 vendor/bin/simple-phpunit "$@"

@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build dev container for testing
-      run: cd docker && docker-compose build && docker-compose up -d
+      run: cd docker && docker-compose build
     - name: Run tests
       run: cd docker && ./run-tests
     - run: docker build .
