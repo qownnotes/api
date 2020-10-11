@@ -12,7 +12,7 @@ RUN composer install \
 # dependencies downloaded by composer
 FROM trafex/alpine-nginx-php7
 USER root
-RUN apk --no-cache add php7-tokenizer
+RUN apk --no-cache add php7-tokenizer php7-pdo php7-pdo_sqlite && apk --no-cache del php7-mysqlnd php7-mysqli
 USER nobody
 COPY --chown=nginx --from=composer /app /var/www
 COPY --chown=nginx --from=composer /app/public /var/www/html
