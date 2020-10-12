@@ -419,7 +419,7 @@ class ReleaseApi
      */
     private function getIPAddress()
     {
-        $ipAddress = $_SERVER["REMOTE_ADDR"];
+        $ipAddress = $_SERVER["REMOTE_ADDR"] ?? "";
 
         // for proxy servers like CloudFlare
         if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
