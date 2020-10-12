@@ -41,8 +41,7 @@
     },
     "config": {
         "platform": {
-            "php": "7.3.23",
-            "ext-something": "1"
+            "php": "7.3"
         },
         "optimize-autoloader": true,
         "preferred-install": {
