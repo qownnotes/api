@@ -1,4 +1,4 @@
-name: Build Webpage
+name: Test Webpage
 on:
   push:
     branches: [ master ]
