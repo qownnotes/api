@@ -6,6 +6,7 @@
         "php": ">=7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "api-platform/core": "^2.5",
         "composer/package-versions-deprecated": "^1.11",
         "doctrine/annotations": "^1.0",
@@ -15,6 +16,7 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "kevinrob/guzzle-cache-middleware": "v3.3.1",
         "league/uri": "^6.3.0",
+        "matomo/matomo-php-tracker": "^2.0",
         "nelmio/cors-bundle": "^2.1",
         "phpdocumentor/reflection-docblock": "^5.2",
         "symfony/asset": "5.1.*",
@@ -29,8 +31,7 @@
         "symfony/serializer": "5.1.*",
         "symfony/twig-bundle": "5.1.*",
         "symfony/validator": "5.1.*",
-        "symfony/yaml": "5.1.*",
-        "ext-json": "*"
+        "symfony/yaml": "5.1.*"
     },
     "require-dev": {
         "justinrainbow/json-schema": "^5.2",

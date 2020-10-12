@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8323706feaf309f5ce80307dbaeea638",
+    "content-hash": "4db78c17e027e40cb7af4578282d487c",
     "packages": [
         {
             "name": "api-platform/core",
@@ -2061,6 +2061,54 @@
                 "url"
             ],
             "time": "2020-02-08T12:10:37+00:00"
+        },
+        {
+            "name": "matomo/matomo-php-tracker",
+            "version": "2.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/matomo-org/matomo-php-tracker.git",
+                "reference": "d8a30200b0bd144f38282df9a8cb5da194da9296"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/matomo-org/matomo-php-tracker/zipball/d8a30200b0bd144f38282df9a8cb5da194da9296",
+                "reference": "d8a30200b0bd144f38282df9a8cb5da194da9296",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=5.3"
+            },
+            "suggest": {
+                "ext-curl": "Using this extension to issue the HTTPS request to Matomo"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "."
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "The Matomo Team",
+                    "email": "hello@matomo.org",
+                    "homepage": "https://matomo.org/team/"
+                }
+            ],
+            "description": "PHP Client for Matomo Analytics Tracking API",
+            "homepage": "https://matomo.org",
+            "keywords": [
+                "analytics",
+                "matomo",
+                "piwik",
+                "tracker"
+            ],
+            "time": "2020-01-14T19:33:53+00:00"
         },
         {
             "name": "nelmio/cors-bundle",
@@ -6407,7 +6455,6 @@
     },
     "platform-dev": [],
     "platform-overrides": {
-        "php": "7.3.23",
-        "ext-something": "1"
+        "php": "7.3"
     }
 }

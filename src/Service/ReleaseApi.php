@@ -17,6 +17,7 @@ use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
+use MatomoTracker;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -156,11 +157,61 @@ class ReleaseApi
 
         foreach($latestReleases as $latestRelease) {
             if ($latestRelease->getIdentifier() === $id) {
+                $this->sendLatestReleaseMatomoEvent($latestRelease, $filters);
                 return $latestRelease;
             }
         }
 
         throw new NotFoundHttpException('Latest release was not found!');
+    }
+
+    /**
+     * @param LatestRelease $latestRelease
+     * @param array $filters
+     */
+    private function sendLatestReleaseMatomoEvent(LatestRelease $latestRelease, array $filters) {
+        $release = $filters["release"] ?? "";
+        $debug = $filters["debug"] ?? 1;
+        $os = $filters["os"] ?? "";
+        $cid = $filters["cid"] ?? "";
+        $version = $filters["version"] ?? "";
+        $updateMode = $filters["um"] ?? "";
+        $ipAddress = $this->getIPAddress();
+        $anonymousString = "";
+
+        if ($cid === "") {
+            $anonymousString = ", anon";
+            $cid = trim("$release $os $ipAddress");
+        }
+
+        if (trim($cid) === "") {
+            $cid = mt_rand();
+        }
+
+        $debugString = $debug == 1 ? "Debug" : "";
+        $eventLabel = trim("$version $os $release [m$updateMode$anonymousString] $debugString");
+
+        $appName = "QOwnNotes";
+        if ($debug == 1) {
+            $appName .= "Debug";
+        }
+
+        // send a request to the Matomo server
+        try {
+            $this->sendMatomoEvent(
+                $cid,
+                $ipAddress,
+                $version,
+                $latestRelease->getIdentifier(),
+                $os,
+                $release,
+                $debug,
+                $updateMode,
+                "web",
+                "update request",
+                $eventLabel
+            );
+        } catch (\Exception $e) {}
     }
 
     public function fetchLatestReleaseJsonData(): array {
@@ -304,5 +355,82 @@ class ReleaseApi
             throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
                 $e->getMessage()));
         }
+    }
+
+    /**
+     * @param $userId
+     * @param string $ipOverride
+     * @param string $versionString
+     * @param string $tagPrefix
+     * @param string $os
+     * @param string $release
+     * @param int $debug
+     * @param int $updateMode
+     * @param string $category
+     * @param string $action
+     * @param string $label
+     * @param int $value
+     * @return mixed
+     * @throws \Exception
+     */
+    private function sendMatomoEvent($userId, $ipOverride = "", $versionString = "", $tagPrefix = "", $os = "", $release = "", $debug = 0, $updateMode = 0, $category = "", $action = "", $label = "", $value = 0)
+    {
+        $updateModeText = "Unknown";
+        switch ($updateMode) {
+            case 1:
+                $updateModeText = "AppStart";
+                break;
+            case 2:
+                $updateModeText = "Manual";
+                break;
+            case 3:
+                $updateModeText = "Periodic";
+                break;
+        }
+
+        $updateModeText .= " ($updateMode)";
+        $idSite = ($debug == 1) ? 6 : 5;
+
+        $matomoTracker = new MatomoTracker($idSite, "http://p.qownnotes.org");
+        $matomoTracker->setIp($ipOverride);
+        $matomoTracker->setTokenAuth(getenv("MATOMO_AUTH_TOKEN"));
+        $matomoTracker->setCustomTrackingParameter("dimension1", $versionString);
+        $matomoTracker->setCustomTrackingParameter("dimension3", $debug);
+        $matomoTracker->setCustomTrackingParameter("dimension7", $os);
+        $matomoTracker->setCustomTrackingParameter("dimension9", $release);
+        $matomoTracker->setCustomTrackingParameter("dimension11", $updateModeText);
+
+        // Matomo workaround for macOS
+        if ($tagPrefix == "macos") {
+            $os = "Macintosh $os";
+        }
+
+        $matomoTracker->setUserAgent("Mozilla/5.0 ($os) MatomoTracker/1.0 (PHP)");
+
+        try {
+            // we want to try to set the _id hash
+            $matomoTracker->setVisitorId($userId);
+        } catch ( \Exception $e ) {
+            $matomoTracker->setUserId($userId);
+        }
+
+        return $matomoTracker->doTrackEvent($category, $action, $label, $value);
+    }
+
+    /**
+     * Returns the IP address of the user
+     *
+     * @return string
+     */
+    private function getIPAddress()
+    {
+        $ipAddress = $_SERVER["REMOTE_ADDR"];
+
+        // for proxy servers like CloudFlare
+        if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+            $ipAddress = $_SERVER["HTTP_X_FORWARDED_FOR"];
+        }
+
+        return $ipAddress;
     }
 }

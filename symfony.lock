@@ -131,6 +131,9 @@
     "league/uri-interfaces": {
         "version": "2.1.0"
     },
+    "matomo/matomo-php-tracker": {
+        "version": "2.0.3"
+    },
     "nelmio/cors-bundle": {
         "version": "1.5",
         "recipe": {
@@ -147,7 +150,7 @@
         "version": "2.8.0"
     },
     "php": {
-        "version": "7.3.23"
+        "version": "7.3"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.2.0"
