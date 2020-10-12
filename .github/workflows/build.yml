@@ -12,8 +12,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build dev container for testing
-      run: cd docker && docker-compose build
+    - name: Install packages
+      run: apt -y --no-install-recommends install ca-certificates curl git php-cli php-curl php-json php-mbstring php-xml php-gmp composer
+    - name: Composer install
+      run: composer install
     - name: Run tests
-      run: cd docker && ./run-tests
-    - run: docker build .
+      run: env SYMFONY_PHPUNIT_VERSION=8 vendor/bin/simple-phpunit
+    - name: Try to build docker image
+      run: docker build .
