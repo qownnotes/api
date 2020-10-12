@@ -191,11 +191,6 @@ class ReleaseApi
         $debugString = $debug == 1 ? "Debug" : "";
         $eventLabel = trim("$version $os $release [m$updateMode$anonymousString] $debugString");
 
-        $appName = "QOwnNotes";
-        if ($debug == 1) {
-            $appName .= "Debug";
-        }
-
         // send a request to the Matomo server
         try {
             $this->sendMatomoEvent(
