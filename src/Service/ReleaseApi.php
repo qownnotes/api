@@ -19,7 +19,6 @@ use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -28,8 +27,6 @@ class ReleaseApi
     const RELEASE_CACHE_TTL = 60;
 
     private $clientHandler;
-
-    private $container;
 
     /**
      * @var ReleaseUrlApi
@@ -42,12 +39,9 @@ class ReleaseApi
     private $cachePool;
 
 
-    public function __construct(
-        ContainerInterface $container
-    )
+    public function __construct()
     {
         $this->clientHandler = null;
-        $this->container = $container;
         $this->urls = new ReleaseUrlApi();
         $this->cachePool = new FilesystemAdapter('qownnotes-api', 60, '/tmp/cache/qownnotes-api');
     }
