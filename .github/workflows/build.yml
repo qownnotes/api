@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
-      run: apt -y --no-install-recommends install ca-certificates curl git php-cli php-curl php-json php-mbstring php-xml php-gmp composer
+      run: sudo apt -y --no-install-recommends install ca-certificates curl git php-cli php-curl php-json php-mbstring php-xml php-gmp composer
     - name: Composer install
       run: composer install
     - name: Run tests
