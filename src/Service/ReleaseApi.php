@@ -195,21 +195,19 @@ class ReleaseApi
         $eventLabel = trim("$version $os $release [m$updateMode$anonymousString] $debugString");
 
         // send a request to the Matomo server
-        try {
-            $this->sendMatomoEvent(
-                $cid,
-                $ipAddress,
-                $version,
-                $latestRelease->getIdentifier(),
-                $os,
-                $release,
-                $debug,
-                $updateMode,
-                "web",
-                "update request",
-                $eventLabel
-            );
-        } catch (\Exception $e) {}
+        $this->sendMatomoEvent(
+            $cid,
+            $ipAddress,
+            $version,
+            $latestRelease->getIdentifier(),
+            $os,
+            $release,
+            $debug,
+            $updateMode,
+            "web",
+            "update request",
+            $eventLabel
+        );
     }
 
     public function fetchLatestReleaseJsonData(): array {
@@ -369,7 +367,6 @@ class ReleaseApi
      * @param string $label
      * @param int $value
      * @return mixed
-     * @throws \Exception
      */
     private function sendMatomoEvent($userId, $ipOverride = "", $versionString = "", $id = "", $os = "", $release = "", $debug = 0, $updateMode = 0, $category = "", $action = "", $label = "", $value = 0)
     {
@@ -392,11 +389,26 @@ class ReleaseApi
         $matomoTracker = new MatomoTracker($idSite, "http://p.qownnotes.org");
         $matomoTracker->setIp($ipOverride);
         $matomoTracker->setTokenAuth(getenv("MATOMO_AUTH_TOKEN"));
-        $matomoTracker->setCustomTrackingParameter("dimension1", $versionString);
-        $matomoTracker->setCustomTrackingParameter("dimension3", $debug);
-        $matomoTracker->setCustomTrackingParameter("dimension7", $os);
-        $matomoTracker->setCustomTrackingParameter("dimension9", $release);
-        $matomoTracker->setCustomTrackingParameter("dimension11", $updateModeText);
+
+        try {
+            $matomoTracker->setCustomTrackingParameter("dimension1", $versionString);
+        } catch (\Exception $e) {}
+
+        try {
+            $matomoTracker->setCustomTrackingParameter("dimension3", $debug);
+        } catch (\Exception $e) {}
+
+        try {
+            $matomoTracker->setCustomTrackingParameter("dimension7", $os);
+        } catch (\Exception $e) {}
+
+        try {
+            $matomoTracker->setCustomTrackingParameter("dimension9", $release);
+        } catch (\Exception $e) {}
+
+        try {
+            $matomoTracker->setCustomTrackingParameter("dimension11", $updateModeText);
+        } catch (\Exception $e) {}
 
         // Matomo workaround for macOS
         if ($id == "macos") {
@@ -409,7 +421,9 @@ class ReleaseApi
             // we want to try to set the _id hash
             $matomoTracker->setVisitorId($userId);
         } catch ( \Exception $e ) {
-            $matomoTracker->setUserId($userId);
+            try {
+                $matomoTracker->setUserId($userId);
+            } catch (\Exception $e) {}
         }
 
         return $matomoTracker->doTrackEvent($category, $action, $label, $value);
