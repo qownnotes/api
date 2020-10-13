@@ -4,3 +4,5 @@
 
 Api used by [QOwnNotes](https://github.com/pbek/QOwnNotes) for checking if there is a new release and
 what the changes were.
+
+![screenshot](screenshot.png)
