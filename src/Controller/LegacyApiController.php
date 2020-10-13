@@ -34,7 +34,7 @@ class LegacyApiController extends AbstractController
 
         $version = $this->requestStack->getCurrentRequest()->get("v");
         $updateMode = $this->requestStack->getCurrentRequest()->get("um");
-        $debug = $this->requestStack->getCurrentRequest()->get("d");
+        $debug = $this->requestStack->getCurrentRequest()->get("debug");
         $release = $this->requestStack->getCurrentRequest()->get("r");
         $os = $this->requestStack->getCurrentRequest()->get("o");
         $cid = $this->requestStack->getCurrentRequest()->get("cid");
