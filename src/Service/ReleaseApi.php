@@ -18,6 +18,7 @@ use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
 use MatomoTracker;
+use Michelf\Markdown;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -118,9 +119,11 @@ class ReleaseApi
         $version = $filters["version"] ?? "";
         $needUpdate = version_compare( $version, $latestVersion, "<" );
 
-        $releaseChangesHtml = ($version !== "" && $needUpdate) ?
+        $releaseChangesMarkdown = ($version !== "" && $needUpdate) ?
             $this->getChangeLogChangesFromGitHubSinceVersion($tagName, $version) :
             $this->getChangeLogChangesFromGitHubForVersion($tagName, $latestVersion);
+
+        $releaseChangesHtml = Markdown::defaultTransform($releaseChangesMarkdown);
 
         foreach ($assets as $asset) {
             $name = $asset["name"];
@@ -356,7 +359,7 @@ class ReleaseApi
      * @param $userId
      * @param string $ipOverride
      * @param string $versionString
-     * @param string $tagPrefix
+     * @param string $id
      * @param string $os
      * @param string $release
      * @param int $debug
@@ -368,7 +371,7 @@ class ReleaseApi
      * @return mixed
      * @throws \Exception
      */
-    private function sendMatomoEvent($userId, $ipOverride = "", $versionString = "", $tagPrefix = "", $os = "", $release = "", $debug = 0, $updateMode = 0, $category = "", $action = "", $label = "", $value = 0)
+    private function sendMatomoEvent($userId, $ipOverride = "", $versionString = "", $id = "", $os = "", $release = "", $debug = 0, $updateMode = 0, $category = "", $action = "", $label = "", $value = 0)
     {
         $updateModeText = "Unknown";
         switch ($updateMode) {
@@ -396,7 +399,7 @@ class ReleaseApi
         $matomoTracker->setCustomTrackingParameter("dimension11", $updateModeText);
 
         // Matomo workaround for macOS
-        if ($tagPrefix == "macos") {
+        if ($id == "macos") {
             $os = "Macintosh $os";
         }
 

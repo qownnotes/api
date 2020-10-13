@@ -134,6 +134,9 @@
     "matomo/matomo-php-tracker": {
         "version": "2.0.3"
     },
+    "michelf/php-markdown": {
+        "version": "1.9.0"
+    },
     "nelmio/cors-bundle": {
         "version": "1.5",
         "recipe": {
