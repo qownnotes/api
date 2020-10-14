@@ -28,10 +28,6 @@ class LegacyApiController extends AbstractController
      */
     public function lastRelease($id)
     {
-        if ($id == "macosx") {
-            $id = "macos";
-        }
-
         $version = $this->requestStack->getCurrentRequest()->get("v");
         $updateMode = $this->requestStack->getCurrentRequest()->get("um");
         $debug = $this->requestStack->getCurrentRequest()->get("debug");

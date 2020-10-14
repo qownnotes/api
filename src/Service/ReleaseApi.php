@@ -158,6 +158,11 @@ class ReleaseApi
     public function fetchLatestRelease(string $id, array $filters): LatestRelease {
         $latestReleases = $this->fetchLatestReleases($filters);
 
+        // also allow "macosx" for Qt compatibility
+        if ($id == "macosx") {
+            $id = "macos";
+        }
+
         foreach($latestReleases as $latestRelease) {
             if ($latestRelease->getIdentifier() === $id) {
                 $this->sendLatestReleaseMatomoEvent($latestRelease, $filters);
