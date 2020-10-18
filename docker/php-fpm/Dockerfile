@@ -30,6 +30,7 @@ RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
         php7.3-fpm \
         php7.3-gmp \
         php7.3-xdebug \
+        php7.3-sqlite3 \
         composer \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
