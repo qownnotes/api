@@ -1,0 +1,2 @@
+* * * * * nginx exec /bin/bash -c ". /run/supervisord.env; /var/www/script.sh >> /var/www/cron.sourced_environment.log"
+* * * * * nginx exec /bin/bash -c "/var/www/script.sh >> /var/www/cron.no_environment.log"
