@@ -1,0 +1,9 @@
+Dockerfile
+docker-compose.yml
+.github
+.git
+.idea
+.gitignore
+.env.local
+.env.local.php
+.env.*.local
