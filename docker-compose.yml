@@ -7,3 +7,5 @@ services:
 #    container_name: qownnotes-api
     ports:
       - "8080:8080"
+    volumes:
+      - ./var/app.db:/var/www/var/app.db

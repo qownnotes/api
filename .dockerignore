@@ -10,3 +10,4 @@ docker-compose.yml
 .env.*.local
 screenshot.png
 tests
+var/app.db

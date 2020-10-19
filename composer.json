@@ -5,6 +5,7 @@
     "require": {
         "php": ">=7.2.5",
         "ext-ctype": "*",
+        "ext-dom": "*",
         "ext-iconv": "*",
         "ext-json": "*",
         "api-platform/core": "^2.5",

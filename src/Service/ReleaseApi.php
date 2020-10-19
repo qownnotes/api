@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\AppRelease;
 use App\Entity\LatestRelease;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
@@ -40,9 +42,15 @@ class ReleaseApi
      */
     private $cachePool;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $em;
 
-    public function __construct()
+
+    public function __construct(EntityManagerInterface $em)
     {
+        $this->em = $em;
         $this->clientHandler = null;
         $this->urls = new ReleaseUrlApi();
         $this->cachePool = new FilesystemAdapter('qownnotes-api', 60, '/tmp/cache/qownnotes-api');
@@ -139,6 +147,7 @@ class ReleaseApi
             $lastRelease->setUrl($asset["browser_download_url"]);
             $lastRelease->setVersion($latestVersion);
             $lastRelease->setDateCreated(new \DateTime($asset["created_at"]));
+            $lastRelease->setReleaseChangesMarkdown($releaseChangesMarkdown);
             $lastRelease->setReleaseChangesHtml($releaseChangesHtml);
             $lastRelease->setNeedUpdate($needUpdate);
             $collection->add($lastRelease);
@@ -155,7 +164,7 @@ class ReleaseApi
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function fetchLatestRelease(string $id, array $filters): LatestRelease {
+    public function fetchLatestRelease(string $id, array $filters = []): LatestRelease {
         $latestReleases = $this->fetchLatestReleases($filters);
 
         // also allow "macosx" for Qt compatibility
@@ -449,5 +458,39 @@ class ReleaseApi
         }
 
         return $ipAddress;
+    }
+
+    /**
+     * Stores an app release if it does not exist
+     *
+     * @param string $versionString
+     * @param string $changeLogText
+     * @param \DateTime $publishedAt
+     * @return AppRelease|false
+     */
+    public function storeAppReleaseIfNotExists(
+        string $versionString,
+        string $changeLogText,
+        \DateTime $publishedAt
+    )
+    {
+        $appRelease = $this->em->getRepository(AppRelease::class)
+            ->findOneBy(['version' => $versionString]);
+
+        if ($appRelease === null)
+        {
+            $appRelease = new AppRelease();
+            $appRelease->setVersion($versionString);
+            $appRelease->setReleaseChangesMarkdown($changeLogText);
+            $appRelease->setDateCreated($publishedAt);
+
+            // persist data
+            $this->em->persist( $appRelease );
+            $this->em->flush();
+
+            return $appRelease;
+        }
+
+        return false;
     }
 }

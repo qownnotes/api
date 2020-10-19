@@ -73,6 +73,13 @@ class LatestRelease
      * @ApiProperty(iri="http://schema.org/text")
      * @Groups({"LatestRelease:output"})
      */
+    private $releaseChangesMarkdown;
+
+    /**
+     * @var string
+     * @ApiProperty(iri="http://schema.org/text")
+     * @Groups({"LatestRelease:output"})
+     */
     private $releaseChangesHtml;
 
     /**
@@ -139,6 +146,18 @@ class LatestRelease
     public function setReleaseChangesHtml(string $releaseChangesHtml): self
     {
         $this->releaseChangesHtml = $releaseChangesHtml;
+
+        return $this;
+    }
+
+    public function getReleaseChangesMarkdown(): ?string
+    {
+        return $this->releaseChangesMarkdown;
+    }
+
+    public function setReleaseChangesMarkdown(string $releaseChangesMarkdown): self
+    {
+        $this->releaseChangesMarkdown = $releaseChangesMarkdown;
 
         return $this;
     }
