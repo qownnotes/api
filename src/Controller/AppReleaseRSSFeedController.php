@@ -15,8 +15,7 @@ class AppReleaseRSSFeedController extends AbstractController
     /**
      * Returns the RSS feed for the app releases
      *
-     * example call (prod):
-     * http://api.qownnotes.org/rss/app-releases.xml
+     * http://api.qownnotes.org/rss/app-releases
      *
      * @Route("/rss/app-releases")
      * @return Response
