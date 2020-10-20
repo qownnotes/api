@@ -236,7 +236,7 @@ class ReleaseApi
                 ]
             ];
 
-            $token = $_ENV['GITHUB_ACCESS_TOKEN'];
+            $token = $this->getEnv('GITHUB_ACCESS_TOKEN');
             if ($token !== '') {
                 $options['headers']['Authorization'] = 'token ' . $token;
             }
@@ -409,7 +409,7 @@ class ReleaseApi
 
         $matomoTracker = new MatomoTracker($idSite, "http://p.qownnotes.org");
         $matomoTracker->setIp($ipOverride);
-        $matomoTracker->setTokenAuth($_ENV["MATOMO_AUTH_TOKEN"]);
+        $matomoTracker->setTokenAuth($this->getEnv("MATOMO_AUTH_TOKEN"));
 
         try {
             $matomoTracker->setCustomTrackingParameter("dimension1", $versionString);
@@ -499,5 +499,17 @@ class ReleaseApi
         }
 
         return false;
+    }
+
+    /**
+     * Return environment variables or variables set in the .env
+     *
+     * @param string $varName
+     * @return string
+     */
+    public function getEnv(string $varName) {
+        $value = getenv($varName);
+
+        return $value === false ? ($_ENV[$varName] ?? "") : $value;
     }
 }
