@@ -233,9 +233,13 @@ class ReleaseApi
             $options = [
                 'headers' => [
                     'Accept' => 'application/vnd.github.v3+json',
-                    'Authorization' => 'token ' . $_ENV['GITHUB_ACCESS_TOKEN'],
                 ]
             ];
+
+            $token = $_ENV['GITHUB_ACCESS_TOKEN'];
+            if ($token !== '') {
+                $options['headers']['Authorization'] = 'token ' . $token;
+            }
 
             // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
             $response = $client->request('GET', $url, $options);
