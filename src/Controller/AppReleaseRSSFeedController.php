@@ -22,7 +22,7 @@ class AppReleaseRSSFeedController extends AbstractController
      */
     public function appReleases()
     {
-        $projectUrl = "http://www.qownnotes.org";
+        $projectUrl = "https://www.qownnotes.org";
 
         $xml = new DOMDocument("1.0", "UTF-8"); // Create new DOM document.
 
@@ -49,7 +49,7 @@ class AppReleaseRSSFeedController extends AbstractController
 
         // a feed should contain an atom:link element (info http://j.mp/1nuzqeC)
         $channelAtomLink = $xml->createElement("atom:link");
-        $channelAtomLink->setAttribute("href", "$projectUrl/rss/app-releases"); // url of the feed
+        $channelAtomLink->setAttribute("href", "https://api.qownnotes.org/rss/app-releases"); // url of the feed
         $channelAtomLink->setAttribute("rel", "self");
         $channelAtomLink->setAttribute("type", "application/rss+xml");
         $channelNode->appendChild($channelAtomLink);
