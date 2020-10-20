@@ -231,7 +231,10 @@ class ReleaseApi
             $url = $this->urls->getReleasesRequestUrl("pbek", "QOwnNotes");
 
             $options = [
-                'headers' => [ 'Accept' => 'application/vnd.github.v3+json' ]
+                'headers' => [
+                    'Accept' => 'application/vnd.github.v3+json',
+                    'Authorization' => 'token ' . $_ENV['GITHUB_ACCESS_TOKEN'],
+                ]
             ];
 
             // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
@@ -402,7 +405,7 @@ class ReleaseApi
 
         $matomoTracker = new MatomoTracker($idSite, "http://p.qownnotes.org");
         $matomoTracker->setIp($ipOverride);
-        $matomoTracker->setTokenAuth(getenv("MATOMO_AUTH_TOKEN"));
+        $matomoTracker->setTokenAuth($_ENV["MATOMO_AUTH_TOKEN"]);
 
         try {
             $matomoTracker->setCustomTrackingParameter("dimension1", $versionString);
