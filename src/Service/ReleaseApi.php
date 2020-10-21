@@ -9,6 +9,7 @@ namespace App\Service;
 
 use App\Entity\AppRelease;
 use App\Entity\LatestRelease;
+use Doctrine\Common\Cache\PhpFileCache;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
@@ -511,5 +512,14 @@ class ReleaseApi
         $value = getenv($varName);
 
         return $value === false ? ($_ENV[$varName] ?? "") : $value;
+    }
+
+    /**
+     * @return PhpFileCache
+     */
+    public static function getCacheDriver() {
+        return new PhpFileCache(
+            '/tmp'
+        );
     }
 }

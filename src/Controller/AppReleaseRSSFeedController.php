@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\AppRelease;
+use App\Service\ReleaseApi;
 use DOMDocument;
 use Michelf\Markdown;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,6 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AppReleaseRSSFeedController extends AbstractController
 {
+    const CACHE_KEY = 'app_releases_rss';
+
     /**
      * Returns the RSS feed for the app releases
      *
@@ -22,93 +25,106 @@ class AppReleaseRSSFeedController extends AbstractController
      */
     public function appReleases()
     {
-        $projectUrl = "https://www.qownnotes.org";
+        $cacheDriver = ReleaseApi::getCacheDriver();
 
-        $xml = new DOMDocument("1.0", "UTF-8"); // Create new DOM document.
+        if (!$cacheDriver->contains(self::CACHE_KEY)) {
+            $projectUrl = "https://www.qownnotes.org";
 
-        // create "RSS" element
-        $rss = $xml->createElement("rss");
-        $rssNode = $xml->appendChild($rss); // Add RSS element to XML node
-        $rssNode->setAttribute("version", "2.0"); // Set RSS version
+            $xml = new DOMDocument("1.0", "UTF-8"); // Create new DOM document.
 
-        // set attributes
-        $rssNode->setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/"); // xmlns:dc (info http://j.mp/1mHIl8e )
-        $rssNode->setAttribute(
-            "xmlns:content",
-            "http://purl.org/rss/1.0/modules/content/"
-        ); // xmlns:content (info http://j.mp/1og3n2W)
-        $rssNode->setAttribute("xmlns:atom", "http://www.w3.org/2005/Atom");// xmlns:atom (http://j.mp/1tErCYX )
+            // create "RSS" element
+            $rss = $xml->createElement("rss");
+            $rssNode = $xml->appendChild($rss); // Add RSS element to XML node
+            $rssNode->setAttribute("version", "2.0"); // Set RSS version
 
-        // Create RFC822 Date format to comply with RFC822
-        $dateF = date("D, d M Y H:i:s T", time());
-        $buildDate = gmdate(DATE_RFC2822, strtotime($dateF));
+            // set attributes
+            $rssNode->setAttribute(
+                "xmlns:dc",
+                "http://purl.org/dc/elements/1.1/"
+            ); // xmlns:dc (info http://j.mp/1mHIl8e )
+            $rssNode->setAttribute(
+                "xmlns:content",
+                "http://purl.org/rss/1.0/modules/content/"
+            ); // xmlns:content (info http://j.mp/1og3n2W)
+            $rssNode->setAttribute("xmlns:atom", "http://www.w3.org/2005/Atom");// xmlns:atom (http://j.mp/1tErCYX )
 
-        // create "channel" element under "RSS" element
-        $channel = $xml->createElement("channel");
-        $channelNode = $rssNode->appendChild($channel);
+            // Create RFC822 Date format to comply with RFC822
+            $dateF = date("D, d M Y H:i:s T", time());
+            $buildDate = gmdate(DATE_RFC2822, strtotime($dateF));
 
-        // a feed should contain an atom:link element (info http://j.mp/1nuzqeC)
-        $channelAtomLink = $xml->createElement("atom:link");
-        $channelAtomLink->setAttribute("href", "https://api.qownnotes.org/rss/app-releases"); // url of the feed
-        $channelAtomLink->setAttribute("rel", "self");
-        $channelAtomLink->setAttribute("type", "application/rss+xml");
-        $channelNode->appendChild($channelAtomLink);
+            // create "channel" element under "RSS" element
+            $channel = $xml->createElement("channel");
+            $channelNode = $rssNode->appendChild($channel);
 
-        // add general elements under "channel" node
-        $channelNode->appendChild($xml->createElement("title", "QOwnNotes release versions")); // title
-        $channelNode->appendChild($xml->createElement("description", "New releases of QOwnNotes"));  // description
-        $channelNode->appendChild($xml->createElement("link", $projectUrl)); // website link
-        $channelNode->appendChild($xml->createElement("language", "en-gb"));  // language
-        $channelNode->appendChild($xml->createElement("lastBuildDate", $buildDate));  // last build date
-        $channelNode->appendChild($xml->createElement("generator", "PHP DOMDocument")); // generator
+            // a feed should contain an atom:link element (info http://j.mp/1nuzqeC)
+            $channelAtomLink = $xml->createElement("atom:link");
+            $channelAtomLink->setAttribute("href", "https://api.qownnotes.org/rss/app-releases"); // url of the feed
+            $channelAtomLink->setAttribute("rel", "self");
+            $channelAtomLink->setAttribute("type", "application/rss+xml");
+            $channelNode->appendChild($channelAtomLink);
 
-        $repository = $this->getDoctrine()
-            ->getRepository('App:AppRelease');
+            // add general elements under "channel" node
+            $channelNode->appendChild($xml->createElement("title", "QOwnNotes release versions")); // title
+            $channelNode->appendChild($xml->createElement("description", "New releases of QOwnNotes"));  // description
+            $channelNode->appendChild($xml->createElement("link", $projectUrl)); // website link
+            $channelNode->appendChild($xml->createElement("language", "en-gb"));  // language
+            $channelNode->appendChild($xml->createElement("lastBuildDate", $buildDate));  // last build date
+            $channelNode->appendChild($xml->createElement("generator", "PHP DOMDocument")); // generator
 
-        $criteria = [];
-        $orderBy = ["dateCreated" => "DESC"];
+            $repository = $this->getDoctrine()
+                ->getRepository('App:AppRelease');
 
-        /** @var AppRelease[] $appReleases */
-        $appReleases = $repository->findBy($criteria, $orderBy, 100);
+            $criteria = [];
+            $orderBy = ["dateCreated" => "DESC"];
 
-        if (count($appReleases) > 0) {
-            foreach ($appReleases as $appRelease) {
-                $version = $appRelease->getVersion();
-                $title = "New release of QOwnNotes: v" . $version;
-                $description = $appRelease->getReleaseChangesMarkdown();
-                $url = "$projectUrl/changelog.html#_" . str_replace(".", "-", $version);
-                $changeLogHTML = Markdown::defaultTransform($description);
+            /** @var AppRelease[] $appReleases */
+            $appReleases = $repository->findBy($criteria, $orderBy, 100);
 
-                $changeLogHTML = strip_tags(
-                    $changeLogHTML,
-                    '<br><br/><h1><h2><h3><ul><ol><li><p><pre><code><a><em><strong>'
-                );
+            if (count($appReleases) > 0) {
+                foreach ($appReleases as $appRelease) {
+                    $version = $appRelease->getVersion();
+                    $title = "New release of QOwnNotes: v".$version;
+                    $description = $appRelease->getReleaseChangesMarkdown();
+                    $url = "$projectUrl/changelog.html#_".str_replace(".", "-", $version);
+                    $changeLogHTML = Markdown::defaultTransform($description);
 
-                $itemNode = $channelNode->appendChild($xml->createElement("item")); // create a new node called "item"
-                $itemNode->appendChild($xml->createElement("title", $title)); // Add Title under "item"
-                $itemNode->appendChild($xml->createElement("link", $url)); // add link node under "item"
+                    $changeLogHTML = strip_tags(
+                        $changeLogHTML,
+                        '<br><br/><h1><h2><h3><ul><ol><li><p><pre><code><a><em><strong>'
+                    );
 
-                // Unique identifier for the item (GUID)
-                $guidLink = $xml->createElement("guid", "qon-app-release-" . $appRelease->getId());
-                $guidLink->setAttribute("isPermaLink", "false");
-                $itemNode->appendChild($guidLink);
+                    $itemNode = $channelNode->appendChild(
+                        $xml->createElement("item")
+                    ); // create a new node called "item"
+                    $itemNode->appendChild($xml->createElement("title", $title)); // Add Title under "item"
+                    $itemNode->appendChild($xml->createElement("link", $url)); // add link node under "item"
 
-                // create "description" node under "item"
-                $description_node = $itemNode->appendChild($xml->createElement("description"));
+                    // Unique identifier for the item (GUID)
+                    $guidLink = $xml->createElement("guid", "qon-app-release-".$appRelease->getId());
+                    $guidLink->setAttribute("isPermaLink", "false");
+                    $itemNode->appendChild($guidLink);
 
-                // fill description node with CDATA content
-                $description_contents = $xml->createCDATASection($changeLogHTML);
-                $description_node->appendChild($description_contents);
+                    // create "description" node under "item"
+                    $description_node = $itemNode->appendChild($xml->createElement("description"));
 
-                // Published date
-                $dateRfc = $appRelease->getDateCreated()->format(\DateTime::RFC2822);
-                $pubDate = $xml->createElement("pubDate", $dateRfc);
+                    // fill description node with CDATA content
+                    $description_contents = $xml->createCDATASection($changeLogHTML);
+                    $description_node->appendChild($description_contents);
 
-                $itemNode->appendChild($pubDate);
+                    // Published date
+                    $dateRfc = $appRelease->getDateCreated()->format(\DateTime::RFC2822);
+                    $pubDate = $xml->createElement("pubDate", $dateRfc);
+
+                    $itemNode->appendChild($pubDate);
+                }
             }
-        }
 
-        $xmlString = $xml->saveXML();
+            $xmlString = $xml->saveXML();
+
+            $cacheDriver->save(self::CACHE_KEY, $xmlString, 60);
+        } else {
+            $xmlString = $cacheDriver->fetch(self::CACHE_KEY);
+        }
 
         return new Response($xmlString, 200, ['Content-Type' => 'text/xml']);
     }
