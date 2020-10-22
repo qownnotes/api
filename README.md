@@ -6,3 +6,5 @@ Api used by [QOwnNotes](https://github.com/pbek/QOwnNotes) for checking if there
 what the changes were.
 
 ![screenshot](screenshot.png)
+
+In addition, there also is a [Release RSS Feed](http://api.qownnotes.org/rss/app-releases).
