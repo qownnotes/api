@@ -3,6 +3,8 @@ FROM composer AS composer
 # copying the source directory and install the dependencies with composer
 COPY . /app
 
+RUN composer dump-env prod
+
 # run composer install to install the dependencies
 RUN composer install \
   --optimize-autoloader \
