@@ -3,12 +3,12 @@ FROM composer AS composer
 # copying the source directory and install the dependencies with composer
 COPY . /app
 
-RUN composer dump-env prod
-
 # run composer install to install the dependencies
 RUN composer install \
   --optimize-autoloader \
   --no-interaction
+
+RUN composer dump-env prod
 
 # continue stage build with the desired image and copy the source including the
 # dependencies downloaded by composer
