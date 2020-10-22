@@ -35,7 +35,10 @@ class StoreReleasesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        while (true) {
+        // we'll kill this script after 60 iterations and let supervisord start it again
+        // in case it hogged memory
+        $killCount = 0;
+        while (++$killCount < 60) {
             $latestRelease = $this->api->fetchLatestRelease("linux");
 
             $version = $latestRelease->getVersion();
@@ -58,5 +61,7 @@ class StoreReleasesCommand extends Command
 
             sleep(60);
         }
+
+        exit(0);
     }
 }
