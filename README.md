@@ -7,4 +7,4 @@ what the changes were.
 
 ![screenshot](screenshot.png)
 
-In addition, there also is a [Release RSS Feed](http://api.qownnotes.org/rss/app-releases).
+In addition, there also is a [Release RSS Feed](http://api.qownnotes.org/rss/app-releases) and an implementation of the legacy update checking api.
