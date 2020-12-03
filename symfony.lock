@@ -113,9 +113,6 @@
     "kevinrob/guzzle-cache-middleware": {
         "version": "v3.3.1"
     },
-    "laminas/laminas-code": {
-        "version": "3.4.1"
-    },
     "laminas/laminas-eventmanager": {
         "version": "3.3.0"
     },
