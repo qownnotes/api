@@ -17,6 +17,6 @@ jobs:
     - name: Do composer install
       run: composer install
     - name: Run tests
-      run: env SYMFONY_PHPUNIT_VERSION=8 vendor/bin/simple-phpunit
+      run: vendor/bin/simple-phpunit
     - name: Try to build docker image
       run: docker build .
