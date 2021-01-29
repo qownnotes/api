@@ -1,4 +1,4 @@
-name: Test Webpage
+name: Test
 on:
   push:
     branches: [ master ]
