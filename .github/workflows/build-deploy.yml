@@ -3,6 +3,9 @@ on:
   push:
     branches: [ release ]
   workflow_dispatch:
+  # build and deploy automatically once a month
+  schedule:
+    - cron: "7 0 1 * *"
 
 jobs:
   build:
