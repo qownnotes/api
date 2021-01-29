@@ -19,12 +19,15 @@ jobs:
       with:
         php_version: 7.4
         version: 2
-    - name: PHPUnit tests
-      uses: php-actions/phpunit@v2
-      with:
-        php_version: 7.4
-        version: 8
+#    - name: PHPUnit tests
+#      uses: php-actions/phpunit@v2
+#      with:
+#        php_version: 7.4
+#        version: 8
 #    - name: Run tests
 #      run: vendor/bin/simple-phpunit
+    - name: Run tests
+      uses: franzliedke/gh-action-php@master
+      run: php7.4 vendor/bin/simple-phpunit
     - name: Try to build docker image
       run: docker build .
