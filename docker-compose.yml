@@ -9,3 +9,6 @@ services:
       - "8080:8080"
     volumes:
       - ./var/app.db:/var/www/var/app.db
+    environment:
+      - TZ=Europe/Vienna
+      - MATOMO_URL=http://p.qownnotes.org
