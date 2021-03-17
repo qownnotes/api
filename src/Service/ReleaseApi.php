@@ -408,7 +408,7 @@ class ReleaseApi
         $updateModeText .= " ($updateMode)";
         $idSite = ($debug == 1) ? 6 : 5;
 
-        $matomoTracker = new MatomoTracker($idSite, $this->getEnv("MATOMO_URL"));
+        $matomoTracker = new MatomoTracker($idSite, $this->getEnv("MATOMO_URL", "http://p.qownnotes.org"));
         $matomoTracker->setIp($ipOverride);
         $matomoTracker->setTokenAuth($this->getEnv("MATOMO_AUTH_TOKEN"));
 
@@ -506,12 +506,13 @@ class ReleaseApi
      * Return environment variables or variables set in the .env
      *
      * @param string $varName
+     * @param string $default
      * @return string
      */
-    public function getEnv(string $varName) {
+    public function getEnv(string $varName, $default = "") {
         $value = getenv($varName);
 
-        return $value === false ? ($_ENV[$varName] ?? "") : $value;
+        return $value === false ? ($_ENV[$varName] ?? $default) : $value;
     }
 
     /**
