@@ -367,8 +367,13 @@ class ReleaseApi
 
             return $response->getBody()->getContents();
         } catch (GuzzleException $e) {
-            throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
-                $e->getMessage()));
+            if ($tag === 'master') {
+                throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
+                    $e->getMessage()));
+            }
+
+            // retry with the master branch in case the tag wasn't created yet in the build process
+            return $this->fetchChangeLog('master');
         } catch (\Exception|UriException $e) {
             throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
                 $e->getMessage()));
