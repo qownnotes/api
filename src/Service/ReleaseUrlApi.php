@@ -10,7 +10,7 @@ use League\Uri\UriTemplate;
 class ReleaseUrlApi
 {
     /**
-     * https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#releases
+     * https://docs.github.com/en/rest/reference/repos#get-the-latest-release
      *
      * @param string $owner
      * @param string $repo
@@ -19,7 +19,7 @@ class ReleaseUrlApi
      */
     public function getReleasesRequestUrl(string $owner, string $repo): string
     {
-        $uriTemplate = new UriTemplate('https://api.github.com/repos/{owner}/{repo}/releases');
+        $uriTemplate = new UriTemplate('https://api.github.com/repos/{owner}/{repo}/releases/latest');
 
         return (string) $uriTemplate->expand([
                 'owner' => $owner,

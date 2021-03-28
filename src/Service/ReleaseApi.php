@@ -108,13 +108,12 @@ class ReleaseApi
         /** @var ArrayCollection<int,LatestRelease> $collection */
         $collection = new ArrayCollection();
 
-        $releaseJsonData = $this->fetchLatestReleaseJsonData();
+        $latestReleaseData = $this->fetchLatestReleaseJsonData();
 
-        if (!isset($releaseJsonData[0])) {
+        if (!isset($latestReleaseData) || count($latestReleaseData) === 0) {
             throw new NotFoundHttpException("No release was found!");
         }
 
-        $latestReleaseData = $releaseJsonData[0];
         $tagName = $latestReleaseData["tag_name"];
         $latestVersion = $str = substr($tagName, 1);;
         $assets = $latestReleaseData["assets"];
