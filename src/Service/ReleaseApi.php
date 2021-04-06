@@ -236,9 +236,10 @@ class ReleaseApi
                 ]
             ];
 
+            $user = $this->getEnv('GITHUB_USER');
             $token = $this->getEnv('GITHUB_ACCESS_TOKEN');
-            if ($token !== '') {
-                $options['headers']['Authorization'] = 'token ' . $token;
+            if ($user !== '' && $token !== '') {
+                $options['auth'] = [$user, $token];
             }
 
             // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
