@@ -15,12 +15,12 @@ jobs:
 #    - name: Install packages
 #      run: sudo apt -y --no-install-recommends install ca-certificates curl git php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-gmp composer
     - name: Install dependencies
-      uses: php-actions/composer@april-2021-issue
+      uses: php-actions/composer@v5
       with:
         php_version: 7.4
         version: 2
     - name: Run tests
-      uses: php-actions/composer@april-2021-issue
+      uses: php-actions/composer@v5
       with:
         command: run test
         php_version: 7.4
