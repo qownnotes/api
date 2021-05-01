@@ -6,9 +6,9 @@ services:
     build: .
 #    container_name: qownnotes-api
     ports:
-      - "8080:8080"
+      - "8080:80"
     volumes:
-      - ./var/app.db:/var/www/var/app.db
+      - ./var/app.db:/app/var/app.db
     environment:
       - TZ=Europe/Vienna
       - MATOMO_URL=http://p.qownnotes.org
