@@ -25,6 +25,9 @@ jobs:
         command: run test
         php_version: 7.4
         version: 2
+      env:
+        # because of: 1x: Class "ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client" should implement method "Symfony\Contracts\HttpClient\HttpClientInterface::withOptions(array $options)": Returns a new instance of the client with new default options.
+        SYMFONY_DEPRECATIONS_HELPER: weak
 #    - name: PHPUnit tests
 #      uses: php-actions/phpunit@v2
 #      with:
