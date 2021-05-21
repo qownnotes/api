@@ -20,7 +20,7 @@ jobs:
         php_version: 7.4
         version: 2
     - name: Run tests
-      uses: php-actions/composer@v5
+      uses: php-actions/composer@40-env
       with:
         command: run test
         php_version: 7.4
