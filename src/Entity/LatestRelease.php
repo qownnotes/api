@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     "get"={"openapi_context"={
  *       "parameters"={
  *         {"name"="identifier", "in"="path", "description"="Type of release [linux, windows, macos]", "type"="string", "enum"={"linux", "windows", "macos"}, "example"="linux"},
- *         {"name"="version", "in"="query", "description"="Version of the application", "type"="string", "example"="21.3.1"},
+ *         {"name"="version", "in"="query", "description"="Version of the application", "type"="string", "example"="21.8.2"},
  *         {"name"="debug", "in"="query", "description"="Debugging release? [0, 1]", "type"="number", "enum"={"0", "1"}, "example"="1"},
  *         {"name"="cid", "in"="query", "description"="Client id", "type"="number"},
  *         {"name"="os", "in"="query", "description"="Operating system", "type"="string"},
