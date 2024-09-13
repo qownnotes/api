@@ -1,0 +1,20 @@
+bash-exec:
+	docker compose exec php-fpm bash
+
+bash:
+	docker compose run --rm php-fpm bash
+
+composer-install:
+	docker compose run --rm php-fpm composer install
+
+build:
+	docker compose build --no-cache
+
+composer-test:
+	docker compose run --rm php-fpm composer test
+
+find-route:
+	./console debug:router | fzf
+
+store-releases:
+	./console app:store-releases
