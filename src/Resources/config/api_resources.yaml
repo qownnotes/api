@@ -1,0 +1,77 @@
+resources:
+  App\Entity\LatestRelease:
+    collectionOperations:
+      get: ~
+    itemOperations:
+      get:
+        openapi_context:
+          parameters:
+            - name: identifier
+              in: path
+              description: "Type of release [linux, windows, macos]"
+              type: string
+              enum: [linux, windows, macos]
+              example: linux
+            - name: version
+              in: query
+              description: "Version of the application"
+              type: string
+              example: "21.8.2"
+            - name: debug
+              in: query
+              description: "Debugging release? [0, 1]"
+              type: number
+              enum: ["0", "1"]
+              example: "1"
+            - name: cid
+              in: query
+              description: "Client id"
+              type: number
+            - name: os
+              in: query
+              description: "Operating system"
+              type: string
+            - name: release
+              in: query
+              description: "Release type"
+              type: string
+            - name: um
+              in: query
+              description: "Update mode"
+              type: number
+    iri: 'http://www.qownnotes.org/Release'
+    description: 'Latest release of QOwnNotes'
+    normalizationContext:
+      groups: ['LatestRelease:output']
+    properties:
+      identifier:
+        identifier: true
+        groups: ['LatestRelease:output']
+        openapi_context:
+          type: string
+          enum: [linux, windows, macos]
+          example: linux
+      url:
+        properties:
+          iri: 'https://schema.org/url'
+        groups: ['LatestRelease:output']
+      version:
+        properties:
+          iri: 'http://schema.org/version'
+        groups: ['LatestRelease:output']
+      dateCreated:
+        properties:
+          iri: 'http://schema.org/dateCreated'
+        groups: ['LatestRelease:output']
+      releaseChangesMarkdown:
+        properties:
+          iri: 'http://schema.org/text'
+        groups: ['LatestRelease:output']
+      releaseChangesHtml:
+        properties:
+          iri: 'http://schema.org/text'
+        groups: ['LatestRelease:output']
+      needUpdate:
+        properties:
+          iri: 'http://schema.org/Boolean'
+        groups: ['LatestRelease:output']

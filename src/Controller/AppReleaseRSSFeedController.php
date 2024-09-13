@@ -4,12 +4,12 @@ namespace App\Controller;
 
 use App\Entity\AppRelease;
 use App\Service\ReleaseApi;
+use Doctrine\Persistence\ManagerRegistry;
 use DOMDocument;
 use Michelf\Markdown;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
 
 class AppReleaseRSSFeedController extends AbstractController
 {
@@ -23,7 +23,7 @@ class AppReleaseRSSFeedController extends AbstractController
      * @Route("/rss/app-releases")
      * @return Response
      */
-    public function appReleases()
+    public function appReleases(ManagerRegistry $doctrine)
     {
         $cacheDriver = ReleaseApi::getCacheDriver();
 
@@ -71,8 +71,7 @@ class AppReleaseRSSFeedController extends AbstractController
             $channelNode->appendChild($xml->createElement("lastBuildDate", $buildDate));  // last build date
             $channelNode->appendChild($xml->createElement("generator", "PHP DOMDocument")); // generator
 
-            $repository = $this->getDoctrine()
-                ->getRepository('App:AppRelease');
+            $repository = $doctrine->getRepository(AppRelease::class);
 
             $criteria = [];
             $orderBy = ["dateCreated" => "DESC"];

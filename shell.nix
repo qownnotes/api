@@ -1,8 +1,12 @@
 { pkgs ? import <nixpkgs> {} }:
   pkgs.mkShell {
-    nativeBuildInputs = [
-      pkgs.symfony-cli
-      pkgs.php81
-      pkgs.php81Packages.composer
+    nativeBuildInputs = with pkgs; [
+      symfony-cli
+      php83
+      php83Packages.composer
+      just # task runner
+      zellij # smart terminal workspace
+      lazygit # git terminal
+      fzf # fuzzy finder
     ];
 }
