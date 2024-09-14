@@ -29,6 +29,7 @@
         "symfony/framework-bundle": "6.4.*",
         "symfony/property-access": "6.4.*",
         "symfony/property-info": "6.4.*",
+        "symfony/runtime": "^6.4",
         "symfony/security-bundle": "6.4.*",
         "symfony/serializer": "6.4.*",
         "symfony/twig-bundle": "6.4.*",
@@ -37,10 +38,11 @@
     },
     "require-dev": {
         "justinrainbow/json-schema": "^6.0",
+        "phpunit/phpunit": "^10.1",
         "symfony/browser-kit": "^6.4",
         "symfony/css-selector": "^6.4",
         "symfony/http-client": "6.4.*",
-        "symfony/phpunit-bridge": "^6.4"
+        "symfony/phpunit-bridge": "^7.0.4"
     },
     "config": {
         "platform": {
@@ -52,7 +54,8 @@
         },
         "sort-packages": true,
         "allow-plugins": {
-            "symfony/flex": true
+            "symfony/flex": true,
+            "symfony/runtime": true
         }
     },
     "autoload": {
