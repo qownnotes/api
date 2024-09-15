@@ -1,9 +1,13 @@
 name: Test
 on:
   push:
-    branches: [ master ]
+    branches:
+      - '**'        # This will match all branches
+      - '!release'  # This excludes the release branch
   pull_request:
-    branches: [ master ]
+    branches:
+      - '**'        # This will match all branches
+      - '!release'  # This excludes the release branch
   workflow_dispatch:
 
 jobs:
@@ -18,13 +22,13 @@ jobs:
     - name: Install dependencies
       uses: php-actions/composer@v5
       with:
-        php_version: 7.4
+        php_version: 8.2
         version: 2
     - name: Run tests
       uses: php-actions/composer@v6
       with:
         command: run test
-        php_version: 7.4
+        php_version: 8.2
         version: 2
       env:
         # because of: 1x: Class "ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client" should implement method "Symfony\Contracts\HttpClient\HttpClientInterface::withOptions(array $options)": Returns a new instance of the client with new default options.
@@ -32,7 +36,7 @@ jobs:
 #    - name: PHPUnit tests
 #      uses: php-actions/phpunit@v2
 #      with:
-#        php_version: 7.4
+#        php_version: 8.2
 #        version: 8
 #    - name: Run tests
 #      run: vendor/bin/simple-phpunit
