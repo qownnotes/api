@@ -2,7 +2,7 @@
 
 namespace App\Tests;
 
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\LatestRelease;
 
 class LatestReleaseTest extends ApiTestCase
@@ -33,7 +33,7 @@ class LatestReleaseTest extends ApiTestCase
 
     public function testGetItem(): void
     {
-        $response = static::createClient()->request('GET', '/latest_releases/linux');
+        static::createClient()->request('GET', '/latest_releases/linux');
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
