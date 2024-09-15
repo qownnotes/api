@@ -16,7 +16,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.7",
         "guzzlehttp/guzzle": "^7.5.0",
-        "kevinrob/guzzle-cache-middleware": "v3.3.1",
+        "kevinrob/guzzle-cache-middleware": "^v3.3.1",
         "league/uri": "^6.3.0",
         "matomo/matomo-php-tracker": "^2.0",
         "michelf/php-markdown": "^1.9",
