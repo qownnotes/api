@@ -22,6 +22,7 @@ use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
 use MatomoTracker;
 use Michelf\Markdown;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -30,6 +31,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 class ReleaseApi
 {
     const RELEASE_CACHE_TTL = 60;
+    public const REQUEST_METHOD_GET = 'GET';
+    public const REQUEST_METHOD_HEAD = 'HEAD';
 
     private $clientHandler;
 
@@ -43,18 +46,21 @@ class ReleaseApi
      */
     private $cachePool;
 
+    private int $cacheTTL;
+
     /**
      * @var EntityManagerInterface
      */
     private $em;
 
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, CacheItemPoolInterface $cachePool)
     {
         $this->em = $em;
         $this->clientHandler = null;
         $this->urls = new ReleaseUrlApi();
-        $this->cachePool = new FilesystemAdapter('qownnotes-api', 60, '/tmp/cache/qownnotes-api');
+        $this->cachePool = $cachePool;
+        $this->cacheTTL = self::RELEASE_CACHE_TTL;
     }
 
     /**
@@ -85,15 +91,17 @@ class ReleaseApi
             'handler' => $stack,
         ];
 
-        $cacheMiddleWare = new CacheMiddleware(
-            new GreedyCacheStrategy(
-                new Psr6CacheStorage($this->cachePool),
-                self::RELEASE_CACHE_TTL
-            )
-        );
+        if ($this->cachePool !== null) {
+            $cacheMiddleWare = new CacheMiddleware(
+                new GreedyCacheStrategy(
+                    new Psr6CacheStorage($this->cachePool),
+                    $this->cacheTTL
+                )
+            );
 
-        $cacheMiddleWare->setHttpMethods(['GET' => true, 'HEAD' => true]);
-        $stack->push($cacheMiddleWare);
+            $cacheMiddleWare->setHttpMethods([self::REQUEST_METHOD_GET => true, self::REQUEST_METHOD_HEAD => true]);
+            $stack->push($cacheMiddleWare);
+        }
 
         return new Client($client_options);
     }
