@@ -375,13 +375,13 @@ class ReleaseApi
 
             return $response->getBody()->getContents();
         } catch (\Exception|UriException|GuzzleException $e) {
-            if ($tag === 'master') {
+            if ($tag === 'main') {
                 throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
                     $e->getMessage()));
             }
 
-            // retry with the master branch in case the tag wasn't created yet in the build process
-            return $this->fetchChangeLog('master');
+            // retry with the main branch in case the tag wasn't created yet in the build process
+            return $this->fetchChangeLog('main');
         }
     }
 
