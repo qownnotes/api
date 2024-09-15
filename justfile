@@ -3,3 +3,6 @@ term:
 
 term-kill:
 	zellij delete-session qownnotes-api -f
+
+clear-cache:
+  rm -rf var/cache/*
