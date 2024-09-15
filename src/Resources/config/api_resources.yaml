@@ -1,9 +1,12 @@
 resources:
   App\Entity\LatestRelease:
     operations:
-      ApiPlatform\Metadata\GetCollection: ~
+      ApiPlatform\Metadata\GetCollection:
+        uriTemplate: '/latest_releases'
+        provider: App\ApiPlatform\LatestReleaseProvider
       ApiPlatform\Metadata\Get:
         uriTemplate: '/latest_releases/{identifier}'
+        provider: App\ApiPlatform\LatestReleaseProvider
         openapi:
           parameters:
             - name: identifier
