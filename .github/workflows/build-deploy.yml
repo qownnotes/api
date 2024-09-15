@@ -1,4 +1,4 @@
-name: ? Create and publish release Docker image
+name: 📦 Create and publish release Docker image
 on:
   push:
     branches: [ release ]
