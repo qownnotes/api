@@ -49,8 +49,8 @@ jobs:
 #        template: '@/contrib/sarif.tpl'
 #        output: 'trivy-results.sarif'
 #        severity: 'CRITICAL,HIGH'
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: 'trivy-results.sarif'
+#
+#    - name: Upload Trivy scan results to GitHub Security tab
+#      uses: github/codeql-action/upload-sarif@v2
+#      with:
+#        sarif_file: 'trivy-results.sarif'
