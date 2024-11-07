@@ -1,12 +1,26 @@
+# Use `just <recipe>` to run a recipe
+# https://just.systems/man/en/
+
+# By default, run the `--list` command
+default:
+    @just --list
+
+[group('docker')]
+logs:
+    docker compose logs -f
+
+[group('docker')]
 bash-exec:
 	docker compose exec php-fpm bash
 
+[group('docker')]
 bash:
 	docker compose run --rm php-fpm bash
 
 composer-install:
 	docker compose run --rm php-fpm composer install
 
+[group('docker')]
 build:
 	docker compose build --no-cache
 
@@ -18,3 +32,8 @@ find-route:
 
 store-releases:
 	./console app:store-releases
+
+# Open the browser with the app
+[group('dev')]
+open-browser:
+    xdg-open http://127.0.0.1:8000
