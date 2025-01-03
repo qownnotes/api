@@ -418,7 +418,7 @@ class ReleaseApi
         $updateModeText .= " ($updateMode)";
         $idSite = ($debug == 1) ? 6 : 5;
 
-        $matomoTracker = new MatomoTracker($idSite, $this->getEnv("MATOMO_URL", "http://p.qownnotes.org"));
+        $matomoTracker = new MatomoTracker($idSite, $this->getEnv("MATOMO_URL", "https://p.qownnotes.org"));
         $matomoTracker->setRequestTimeout(5);
         $matomoTracker->setIp($ipOverride);
         $matomoTracker->setTokenAuth($this->getEnv("MATOMO_AUTH_TOKEN"));

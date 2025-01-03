@@ -11,4 +11,4 @@ services:
       - ./var/app.db:/app/var/app.db
     environment:
       - TZ=Europe/Vienna
-      - MATOMO_URL=http://p.qownnotes.org
+      - MATOMO_URL=https://p.qownnotes.org

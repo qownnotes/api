@@ -14,7 +14,7 @@ services:
     environment:
       - TERM_PROGRAM=Hyper  # force colors for the symfony dumper
       - TZ=Europe/Vienna
-      - MATOMO_URL=http://p.qownnotes.org
+      - MATOMO_URL=https://p.qownnotes.org
     build:
       context: php-fpm
     working_dir: /application
