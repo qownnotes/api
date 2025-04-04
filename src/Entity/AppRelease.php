@@ -1,6 +1,7 @@
 <?php
+
 /**
- * AppRelease entity class
+ * AppRelease entity class.
  */
 
 namespace App\Entity;
@@ -9,13 +10,16 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
+ *
  * @ORM\Table(name="app_release")
  */
 class AppRelease
 {
     /**
      * @ORM\Column(type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
@@ -35,15 +39,15 @@ class AppRelease
      */
     protected $dateCreated;
 
-//    /**
-//     * @ORM\Column(type="integer")
-//     */
-//    protected $created;
+    //    /**
+    //     * @ORM\Column(type="integer")
+    //     */
+    //    protected $created;
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -51,9 +55,10 @@ class AppRelease
     }
 
     /**
-     * Set version
+     * Set version.
      *
      * @param string $version
+     *
      * @return AppRelease
      */
     public function setVersion($version)
@@ -64,7 +69,7 @@ class AppRelease
     }
 
     /**
-     * Get version
+     * Get version.
      *
      * @return string
      */
@@ -74,9 +79,10 @@ class AppRelease
     }
 
     /**
-     * Set releaseChangesMarkdown
+     * Set releaseChangesMarkdown.
      *
      * @param string $releaseChangesMarkdown
+     *
      * @return AppRelease
      */
     public function setReleaseChangesMarkdown($releaseChangesMarkdown)
@@ -87,7 +93,7 @@ class AppRelease
     }
 
     /**
-     * Get releaseChangesMarkdown
+     * Get releaseChangesMarkdown.
      *
      * @return string
      */
@@ -97,9 +103,10 @@ class AppRelease
     }
 
     /**
-     * Set dateCreated
+     * Set dateCreated.
      *
      * @param \DateTime $dateCreated
+     *
      * @return AppRelease
      */
     public function setDateCreated($dateCreated)
@@ -110,7 +117,7 @@ class AppRelease
     }
 
     /**
-     * Get dateCreated
+     * Get dateCreated.
      *
      * @return \DateTime
      */
@@ -119,26 +126,26 @@ class AppRelease
         return $this->dateCreated;
     }
 
-//    /**
-//     * Set created
-//     *
-//     * @param \integer $created
-//     * @return AppRelease
-//     */
-//    public function setCreated($created)
-//    {
-//        $this->created = $created;
-//
-//        return $this;
-//    }
-//
-//    /**
-//     * Get created
-//     *
-//     * @return \integer
-//     */
-//    public function getCreated()
-//    {
-//        return $this->created;
-//    }
+    //    /**
+    //     * Set created
+    //     *
+    //     * @param \integer $created
+    //     * @return AppRelease
+    //     */
+    //    public function setCreated($created)
+    //    {
+    //        $this->created = $created;
+    //
+    //        return $this;
+    //    }
+    //
+    //    /**
+    //     * Get created
+    //     *
+    //     * @return \integer
+    //     */
+    //    public function getCreated()
+    //    {
+    //        return $this->created;
+    //    }
 }

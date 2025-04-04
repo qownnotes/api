@@ -1,24 +1,24 @@
 name: "qownnotes-api"
 
 services:
-  web:
-    image: nginx:alpine
-    working_dir: /application
-    volumes:
-      - ..:/application
-      - ./webserver/nginx.conf:/etc/nginx/conf.d/default.conf
-    ports:
-      - "127.0.0.1:8000:80"
+    web:
+        image: nginx:alpine
+        working_dir: /application
+        volumes:
+            - ..:/application
+            - ./webserver/nginx.conf:/etc/nginx/conf.d/default.conf
+        ports:
+            - "127.0.0.1:8000:80"
 
-  php-fpm:
-    environment:
-      - TERM_PROGRAM=Hyper  # force colors for the symfony dumper
-      - TZ=Europe/Vienna
-      - MATOMO_URL=https://p.qownnotes.org
-    build:
-      context: php-fpm
-    working_dir: /application
-    volumes:
-      - ..:/application
-      - ./php-fpm/php-ini-overrides.ini:/etc/php/8.2/fpm/conf.d/99-overrides.ini
-      - ./php-fpm/php-fpm-overrides.conf:/etc/php/8.2/fpm/pool.d/z-overrides.conf
+    php-fpm:
+        environment:
+            - TERM_PROGRAM=Hyper # force colors for the symfony dumper
+            - TZ=Europe/Vienna
+            - MATOMO_URL=https://p.qownnotes.org
+        build:
+            context: php-fpm
+        working_dir: /application
+        volumes:
+            - ..:/application
+            - ./php-fpm/php-ini-overrides.ini:/etc/php/8.2/fpm/conf.d/99-overrides.ini
+            - ./php-fpm/php-fpm-overrides.conf:/etc/php/8.2/fpm/pool.d/z-overrides.conf

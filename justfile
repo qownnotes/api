@@ -27,7 +27,7 @@ term-kill:
 # Clear the cache
 [group('dev')]
 clear-cache:
-  rm -rf var/cache/*
+    rm -rf var/cache/*
 
 # Apply the patch to the qownnotes-api repository
 [group('patch')]

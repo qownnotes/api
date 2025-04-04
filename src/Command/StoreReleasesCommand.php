@@ -1,10 +1,10 @@
 <?php
 
 // src/Command/CreateUserCommand.php
+
 namespace App\Command;
 
 use App\Entity\AppRelease;
-use App\Entity\LatestRelease;
 use App\Service\ReleaseApi;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,24 +39,21 @@ class StoreReleasesCommand extends Command
         // in case it hogged memory
         $killCount = 0;
         while (++$killCount < 60) {
-            $latestRelease = $this->api->fetchLatestRelease("linux");
+            $latestRelease = $this->api->fetchLatestRelease('linux');
 
             $version = $latestRelease->getVersion();
-            $output->writeln( "Found version '$version'" );
+            $output->writeln("Found version '$version'");
             $appRelease = $this->api->storeAppReleaseIfNotExists(
                 $version,
                 $latestRelease->getReleaseChangesMarkdown(),
                 $latestRelease->getDateCreated()
             );
 
-            if ($appRelease instanceof AppRelease)
-            {
+            if ($appRelease instanceof AppRelease) {
                 $id = $appRelease->getId();
-                $output->writeln( "A new app release was created (id: $id)" );
-            }
-            else
-            {
-                $output->writeln( "App release already existed" );
+                $output->writeln("A new app release was created (id: $id)");
+            } else {
+                $output->writeln('App release already existed');
             }
 
             sleep(60);

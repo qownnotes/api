@@ -10,11 +10,8 @@ use League\Uri\UriTemplate;
 class ReleaseUrlApi
 {
     /**
-     * https://docs.github.com/en/rest/reference/repos#get-the-latest-release
+     * https://docs.github.com/en/rest/reference/repos#get-the-latest-release.
      *
-     * @param string $owner
-     * @param string $repo
-     * @return string
      * @throws UriException
      */
     public function getReleasesRequestUrl(string $owner, string $repo): string
@@ -22,14 +19,12 @@ class ReleaseUrlApi
         $uriTemplate = new UriTemplate('https://api.github.com/repos/{owner}/{repo}/releases/latest');
 
         return (string) $uriTemplate->expand([
-                'owner' => $owner,
-                'repo' => $repo,
-            ]);
+            'owner' => $owner,
+            'repo' => $repo,
+        ]);
     }
 
     /**
-     * @param string $tag
-     * @return string
      * @throws UriException
      */
     public function getChangeLogUrl(string $tag): string
@@ -37,7 +32,7 @@ class ReleaseUrlApi
         $uriTemplate = new UriTemplate('https://raw.githubusercontent.com/pbek/QOwnNotes/{tag}/CHANGELOG.md');
 
         return (string) $uriTemplate->expand([
-                'tag' => $tag,
-            ]);
+            'tag' => $tag,
+        ]);
     }
 }

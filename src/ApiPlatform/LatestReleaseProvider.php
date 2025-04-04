@@ -1,6 +1,7 @@
 <?php
+
 /**
- * LatestRelease data provider
+ * LatestRelease data provider.
  */
 
 declare(strict_types=1);
@@ -25,6 +26,7 @@ final class LatestReleaseProvider extends AbstractController implements Provider
 
     /**
      * @return LatestRelease[]|LatestRelease|null
+     *
      * @throws \Exception
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null

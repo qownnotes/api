@@ -17,40 +17,45 @@ class LatestRelease
 
     /**
      * @var string
+     *
      * @Groups({"LatestRelease:output"})
      */
     private $url;
 
     /**
      * @var string
+     *
      * @Groups({"LatestRelease:output"})
      */
     private $version;
 
     /**
      * @var \DateTime
+     *
      * @Groups({"LatestRelease:output"})
      */
     private $dateCreated;
 
     /**
      * @var string
+     *
      * @Groups({"LatestRelease:output"})
      */
     private $releaseChangesMarkdown;
 
     /**
      * @var string
+     *
      * @Groups({"LatestRelease:output"})
      */
     private $releaseChangesHtml;
 
     /**
      * @var bool
+     *
      * @Groups({"LatestRelease:output"})
      */
     private $needUpdate;
-
 
     public function setIdentifier(string $identifier): self
     {

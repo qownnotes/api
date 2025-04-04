@@ -22,37 +22,38 @@ class LegacyApiController extends AbstractController
 
     /**
      * @Route("/api/v1/last_release/QOwnNotes/{id}.json")
-     * @param $id
+     *
      * @return JsonResponse
+     *
      * @throws \Exception
      */
     public function lastRelease($id)
     {
-        $version = $this->requestStack->getCurrentRequest()->get("v");
-        $updateMode = $this->requestStack->getCurrentRequest()->get("um");
-        $debug = $this->requestStack->getCurrentRequest()->get("debug");
-        $release = $this->requestStack->getCurrentRequest()->get("r");
-        $os = $this->requestStack->getCurrentRequest()->get("o");
-        $cid = $this->requestStack->getCurrentRequest()->get("cid");
+        $version = $this->requestStack->getCurrentRequest()->get('v');
+        $updateMode = $this->requestStack->getCurrentRequest()->get('um');
+        $debug = $this->requestStack->getCurrentRequest()->get('debug');
+        $release = $this->requestStack->getCurrentRequest()->get('r');
+        $os = $this->requestStack->getCurrentRequest()->get('o');
+        $cid = $this->requestStack->getCurrentRequest()->get('cid');
 
         $filter = [
-            "version" => $version,
-            "um" => $updateMode,
-            "debug" => $debug,
-            "release" => $release,
-            "os" => $os,
-            "cid" => $cid,
+            'version' => $version,
+            'um' => $updateMode,
+            'debug' => $debug,
+            'release' => $release,
+            'os' => $os,
+            'cid' => $cid,
         ];
 
         $latestRelease = $this->api->fetchLatestRelease($id, $filter);
 
         $result = [
-            "should_update" => $latestRelease->getNeedUpdate(),
-            "release_version_string" => $latestRelease->getVersion(),
-            "changes_html" => $latestRelease->getReleaseChangesHtml(),
-            "release" => [
-                "assets" => [0 => ["browser_download_url" => $latestRelease->getUrl()]]
-            ]
+            'should_update' => $latestRelease->getNeedUpdate(),
+            'release_version_string' => $latestRelease->getVersion(),
+            'changes_html' => $latestRelease->getReleaseChangesHtml(),
+            'release' => [
+                'assets' => [0 => ['browser_download_url' => $latestRelease->getUrl()]],
+            ],
         ];
 
         return $this->json($result);

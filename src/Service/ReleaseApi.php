@@ -15,12 +15,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
-use JsonException;
 use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
-use MatomoTracker;
 use Michelf\Markdown;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -30,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class ReleaseApi
 {
-    const RELEASE_CACHE_TTL = 60;
+    public const RELEASE_CACHE_TTL = 60;
     public const REQUEST_METHOD_GET = 'GET';
     public const REQUEST_METHOD_HEAD = 'HEAD';
 
@@ -53,7 +51,6 @@ class ReleaseApi
      */
     private $em;
 
-
     public function __construct(EntityManagerInterface $em, CacheItemPoolInterface $cachePool)
     {
         $this->em = $em;
@@ -65,7 +62,6 @@ class ReleaseApi
 
     /**
      * Replace the guzzle client handler for testing.
-     * @param object|null $handler
      */
     public function setClientHandler(?object $handler)
     {
@@ -91,7 +87,7 @@ class ReleaseApi
             'handler' => $stack,
         ];
 
-        if ($this->cachePool !== null) {
+        if (null !== $this->cachePool) {
             $cacheMiddleWare = new CacheMiddleware(
                 new GreedyCacheStrategy(
                     new Psr6CacheStorage($this->cachePool),
@@ -107,8 +103,8 @@ class ReleaseApi
     }
 
     /**
-     * @param array $filters
      * @return ArrayCollection|LatestRelease[]
+     *
      * @throws \Exception
      */
     public function fetchLatestReleases(array $filters = []): ArrayCollection
@@ -118,31 +114,31 @@ class ReleaseApi
 
         $latestReleaseData = $this->fetchLatestReleaseJsonData();
 
-        if (!isset($latestReleaseData) || count($latestReleaseData) === 0) {
-            throw new NotFoundHttpException("No release was found!");
+        if (!isset($latestReleaseData) || 0 === count($latestReleaseData)) {
+            throw new NotFoundHttpException('No release was found!');
         }
 
-        $tagName = $latestReleaseData["tag_name"];
-        $latestVersion = $str = substr($tagName, 1);;
-        $assets = $latestReleaseData["assets"];
+        $tagName = $latestReleaseData['tag_name'];
+        $latestVersion = $str = substr($tagName, 1);
+        $assets = $latestReleaseData['assets'];
 
         $nameHash = [
-            "QOwnNotes-x86_64.AppImage" => "linux",
-            "QOwnNotes.zip" => "windows",
-            "QOwnNotes.dmg" => "macos",
+            'QOwnNotes-x86_64.AppImage' => 'linux',
+            'QOwnNotes.zip' => 'windows',
+            'QOwnNotes.dmg' => 'macos',
         ];
 
-        $version = $filters["version"] ?? "";
-        $needUpdate = version_compare( $version, $latestVersion, "<" );
+        $version = $filters['version'] ?? '';
+        $needUpdate = version_compare($version, $latestVersion, '<');
 
-        $releaseChangesMarkdown = ($version !== "" && $needUpdate) ?
+        $releaseChangesMarkdown = ('' !== $version && $needUpdate) ?
             $this->getChangeLogChangesFromGitHubSinceVersion($tagName, $version) :
             $this->getChangeLogChangesFromGitHubForVersion($tagName, $latestVersion);
 
         $releaseChangesHtml = Markdown::defaultTransform($releaseChangesMarkdown);
 
         foreach ($assets as $asset) {
-            $name = $asset["name"];
+            $name = $asset['name'];
 
             if (!isset($nameHash[$name])) {
                 continue;
@@ -152,9 +148,9 @@ class ReleaseApi
 
             $lastRelease = new LatestRelease();
             $lastRelease->setIdentifier($id);
-            $lastRelease->setUrl($asset["browser_download_url"]);
+            $lastRelease->setUrl($asset['browser_download_url']);
             $lastRelease->setVersion($latestVersion);
-            $lastRelease->setDateCreated(new \DateTime($asset["created_at"]));
+            $lastRelease->setDateCreated(new \DateTime($asset['created_at']));
             $lastRelease->setReleaseChangesMarkdown($releaseChangesMarkdown);
             $lastRelease->setReleaseChangesHtml($releaseChangesHtml);
             $lastRelease->setNeedUpdate($needUpdate);
@@ -165,24 +161,23 @@ class ReleaseApi
     }
 
     /**
-     * @param string $id
-     * @param array $filters
-     * @return LatestRelease
      * @throws UnprocessableEntityHttpException
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function fetchLatestRelease(string $id, array $filters = []): LatestRelease {
+    public function fetchLatestRelease(string $id, array $filters = []): LatestRelease
+    {
         $latestReleases = $this->fetchLatestReleases($filters);
 
         // also allow "macosx" for Qt compatibility
-        if ($id == "macosx") {
-            $id = "macos";
+        if ('macosx' == $id) {
+            $id = 'macos';
         }
 
-        foreach($latestReleases as $latestRelease) {
+        foreach ($latestReleases as $latestRelease) {
             if ($latestRelease->getIdentifier() === $id) {
                 $this->sendLatestReleaseMatomoEvent($latestRelease, $filters);
+
                 return $latestRelease;
             }
         }
@@ -190,30 +185,27 @@ class ReleaseApi
         throw new NotFoundHttpException('Latest release was not found!');
     }
 
-    /**
-     * @param LatestRelease $latestRelease
-     * @param array $filters
-     */
-    private function sendLatestReleaseMatomoEvent(LatestRelease $latestRelease, array $filters) {
-        $release = $filters["release"] ?? "";
-        $debug = $filters["debug"] ?? 1;
-        $os = $filters["os"] ?? "";
-        $cid = $filters["cid"] ?? "";
-        $version = $filters["version"] ?? "";
-        $updateMode = $filters["um"] ?? "";
+    private function sendLatestReleaseMatomoEvent(LatestRelease $latestRelease, array $filters)
+    {
+        $release = $filters['release'] ?? '';
+        $debug = $filters['debug'] ?? 1;
+        $os = $filters['os'] ?? '';
+        $cid = $filters['cid'] ?? '';
+        $version = $filters['version'] ?? '';
+        $updateMode = $filters['um'] ?? '';
         $ipAddress = $this->getIPAddress();
-        $anonymousString = "";
+        $anonymousString = '';
 
-        if ($cid === "") {
-            $anonymousString = ", anon";
+        if ('' === $cid) {
+            $anonymousString = ', anon';
             $cid = trim("$release $os $ipAddress");
         }
 
-        if (trim($cid) === "") {
+        if ('' === trim($cid)) {
             $cid = mt_rand();
         }
 
-        $debugString = $debug == 1 ? "Debug" : "";
+        $debugString = 1 == $debug ? 'Debug' : '';
         $eventLabel = trim("$version $os $release [m$updateMode$anonymousString] $debugString");
 
         // send a request to the Matomo server
@@ -226,27 +218,28 @@ class ReleaseApi
             $release,
             $debug,
             $updateMode,
-            "web",
-            "update request",
+            'web',
+            'update request',
             $eventLabel
         );
     }
 
-    public function fetchLatestReleaseJsonData(): array {
+    public function fetchLatestReleaseJsonData(): array
+    {
         $client = $this->getReleaseClient();
 
         try {
-            $url = $this->urls->getReleasesRequestUrl("pbek", "QOwnNotes");
+            $url = $this->urls->getReleasesRequestUrl('pbek', 'QOwnNotes');
 
             $options = [
                 'headers' => [
                     'Accept' => 'application/vnd.github.v3+json',
-                ]
+                ],
             ];
 
             $user = $this->getEnv('GITHUB_USER');
             $token = $this->getEnv('GITHUB_ACCESS_TOKEN');
-            if ($user !== '' && $token !== '') {
+            if ('' !== $user && '' !== $token) {
                 $options['auth'] = [$user, $token];
             }
 
@@ -255,30 +248,22 @@ class ReleaseApi
 
             return $this->decodeResponse($response);
         } catch (GuzzleException $e) {
-            throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s',
-                $e->getMessage()));
+            throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s', $e->getMessage()));
         } catch (\Exception|UriException $e) {
-            throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s',
-                $e->getMessage()));
+            throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s', $e->getMessage()));
         }
     }
 
-    /**
-     * @param $jsonData
-     * @return LatestRelease
-     */
-    public function latestReleaseFromJsonItem($identifier, $jsonData): LatestRelease {
+    public function latestReleaseFromJsonItem($identifier, $jsonData): LatestRelease
+    {
         $latestRelease = new LatestRelease();
-        $latestRelease->setIdentifier($jsonData["id"]);
-        $latestRelease->setUrl($jsonData["name"]);
+        $latestRelease->setIdentifier($jsonData['id']);
+        $latestRelease->setUrl($jsonData['name']);
 
         return $latestRelease;
     }
 
     /**
-     * @param ResponseInterface $response
-     * @return mixed
-     *
      * @throws UnprocessableEntityHttpException
      */
     private function decodeResponse(ResponseInterface $response)
@@ -286,7 +271,7 @@ class ReleaseApi
         $body = $response->getBody();
         try {
             return self::decodeJSON((string) $body, true);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new UnprocessableEntityHttpException(sprintf('Invalid json: %s', $e->getMessage()));
         }
     }
@@ -294,16 +279,14 @@ class ReleaseApi
     /**
      * Like json_decode but throws on invalid json data.
      *
-     * @throws JsonException
-     *
-     * @return mixed
+     * @throws \JsonException
      */
     public static function decodeJSON(string $json, bool $assoc = false)
     {
         $result = json_decode($json, $assoc);
         $json_error = json_last_error();
-        if ($json_error !== JSON_ERROR_NONE) {
-            throw new JsonException(sprintf('%s: "%s"', json_last_error_msg(), print_r($json, true)));
+        if (JSON_ERROR_NONE !== $json_error) {
+            throw new \JsonException(sprintf('%s: "%s"', json_last_error_msg(), print_r($json, true)));
         }
 
         return $result;
@@ -311,10 +294,8 @@ class ReleaseApi
 
     /**
      * Parses the change log file CHANGELOG.md in a repository on GitHub at a certain tag
-     * and returns the text for a certain version string
+     * and returns the text for a certain version string.
      *
-     * @param string $tag
-     * @param string $versionString
      * @return string the changes text
      */
     private function getChangeLogChangesFromGitHubForVersion(string $tag, string $versionString)
@@ -326,14 +307,12 @@ class ReleaseApi
         // parse the changelog
         preg_match('/## '.$versionString.'\n(.+?)\n\n## [\d.]+/sim', $changeLogData, $matches);
 
-        return isset($matches[1]) ? trim($matches[1]) : "";
+        return isset($matches[1]) ? trim($matches[1]) : '';
     }
 
     /**
-     * Fetches a file in a repository on GitHub from a certain branch / tag
+     * Fetches a file in a repository on GitHub from a certain branch / tag.
      *
-     * @param string $identifier
-     * @param string $fileName
      * @return string the changes text
      */
     private function fetchRawFileFromGitHub(string $identifier, string $fileName)
@@ -344,14 +323,10 @@ class ReleaseApi
         return file_get_contents($url);
     }
 
-
     /**
      * Parses the change log file CHANGELOG.md in a repository on GitHub at a certain tag
-     * and returns the text above the version string
+     * and returns the text above the version string.
      *
-     * @param string $repository
-     * @param string $tag
-     * @param string $versionString
      * @return string the changes text
      */
     private function getChangeLogChangesFromGitHubSinceVersion(string $tag, string $versionString)
@@ -364,7 +339,8 @@ class ReleaseApi
         return trim($dataList[0]);
     }
 
-    private function fetchChangeLog($tag): string {
+    private function fetchChangeLog($tag): string
+    {
         $client = $this->getReleaseClient();
 
         try {
@@ -375,9 +351,8 @@ class ReleaseApi
 
             return $response->getBody()->getContents();
         } catch (\Exception|UriException|GuzzleException $e) {
-            if ($tag === 'main') {
-                throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s',
-                    $e->getMessage()));
+            if ('main' === $tag) {
+                throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s', $e->getMessage()));
             }
 
             // retry with the main branch in case the tag wasn't created yet in the build process
@@ -386,65 +361,68 @@ class ReleaseApi
     }
 
     /**
-     * @param $userId
      * @param string $ipOverride
      * @param string $versionString
      * @param string $id
      * @param string $os
      * @param string $release
-     * @param int $debug
-     * @param int $updateMode
+     * @param int    $debug
+     * @param int    $updateMode
      * @param string $category
      * @param string $action
      * @param string $label
-     * @param int $value
-     * @return mixed
+     * @param int    $value
      */
-    private function sendMatomoEvent($userId, $ipOverride = "", $versionString = "", $id = "", $os = "", $release = "", $debug = 0, $updateMode = 0, $category = "", $action = "", $label = "", $value = 0)
+    private function sendMatomoEvent($userId, $ipOverride = '', $versionString = '', $id = '', $os = '', $release = '', $debug = 0, $updateMode = 0, $category = '', $action = '', $label = '', $value = 0)
     {
-        $updateModeText = "Unknown";
+        $updateModeText = 'Unknown';
         switch ($updateMode) {
             case 1:
-                $updateModeText = "AppStart";
+                $updateModeText = 'AppStart';
                 break;
             case 2:
-                $updateModeText = "Manual";
+                $updateModeText = 'Manual';
                 break;
             case 3:
-                $updateModeText = "Periodic";
+                $updateModeText = 'Periodic';
                 break;
         }
 
         $updateModeText .= " ($updateMode)";
-        $idSite = ($debug == 1) ? 6 : 5;
+        $idSite = (1 == $debug) ? 6 : 5;
 
-        $matomoTracker = new MatomoTracker($idSite, $this->getEnv("MATOMO_URL", "https://p.qownnotes.org"));
+        $matomoTracker = new \MatomoTracker($idSite, $this->getEnv('MATOMO_URL', 'https://p.qownnotes.org'));
         $matomoTracker->setRequestTimeout(5);
         $matomoTracker->setIp($ipOverride);
-        $matomoTracker->setTokenAuth($this->getEnv("MATOMO_AUTH_TOKEN"));
+        $matomoTracker->setTokenAuth($this->getEnv('MATOMO_AUTH_TOKEN'));
 
         try {
-            $matomoTracker->setCustomTrackingParameter("dimension1", $versionString);
-        } catch (\Exception $e) {}
+            $matomoTracker->setCustomTrackingParameter('dimension1', $versionString);
+        } catch (\Exception $e) {
+        }
 
         try {
-            $matomoTracker->setCustomTrackingParameter("dimension3", $debug);
-        } catch (\Exception $e) {}
+            $matomoTracker->setCustomTrackingParameter('dimension3', $debug);
+        } catch (\Exception $e) {
+        }
 
         try {
-            $matomoTracker->setCustomTrackingParameter("dimension7", $os);
-        } catch (\Exception $e) {}
+            $matomoTracker->setCustomTrackingParameter('dimension7', $os);
+        } catch (\Exception $e) {
+        }
 
         try {
-            $matomoTracker->setCustomTrackingParameter("dimension9", $release);
-        } catch (\Exception $e) {}
+            $matomoTracker->setCustomTrackingParameter('dimension9', $release);
+        } catch (\Exception $e) {
+        }
 
         try {
-            $matomoTracker->setCustomTrackingParameter("dimension11", $updateModeText);
-        } catch (\Exception $e) {}
+            $matomoTracker->setCustomTrackingParameter('dimension11', $updateModeText);
+        } catch (\Exception $e) {
+        }
 
         // Matomo workaround for macOS
-        if ($id == "macos") {
+        if ('macos' == $id) {
             $os = "Macintosh $os";
         }
 
@@ -453,58 +431,54 @@ class ReleaseApi
         try {
             // we want to try to set the _id hash
             $matomoTracker->setVisitorId($userId);
-        } catch ( \Exception $e ) {
+        } catch (\Exception $e) {
             try {
                 $matomoTracker->setUserId($userId);
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
 
         return $matomoTracker->doTrackEvent($category, $action, $label, $value);
     }
 
     /**
-     * Returns the IP address of the user
+     * Returns the IP address of the user.
      *
      * @return string
      */
     private function getIPAddress()
     {
-        $ipAddress = $_SERVER["REMOTE_ADDR"] ?? "";
+        $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
 
         // for proxy servers like CloudFlare
-        if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-            $ipAddress = $_SERVER["HTTP_X_FORWARDED_FOR"];
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
         }
 
         return $ipAddress;
     }
 
     /**
-     * Stores an app release if it does not exist
+     * Stores an app release if it does not exist.
      *
-     * @param string $versionString
-     * @param string $changeLogText
-     * @param \DateTime $publishedAt
      * @return AppRelease|false
      */
     public function storeAppReleaseIfNotExists(
         string $versionString,
         string $changeLogText,
-        \DateTime $publishedAt
-    )
-    {
+        \DateTime $publishedAt,
+    ) {
         $appRelease = $this->em->getRepository(AppRelease::class)
             ->findOneBy(['version' => $versionString]);
 
-        if ($appRelease === null)
-        {
+        if (null === $appRelease) {
             $appRelease = new AppRelease();
             $appRelease->setVersion($versionString);
             $appRelease->setReleaseChangesMarkdown($changeLogText);
             $appRelease->setDateCreated($publishedAt);
 
             // persist data
-            $this->em->persist( $appRelease );
+            $this->em->persist($appRelease);
             $this->em->flush();
 
             return $appRelease;
@@ -514,22 +488,24 @@ class ReleaseApi
     }
 
     /**
-     * Return environment variables or variables set in the .env
+     * Return environment variables or variables set in the .env.
      *
-     * @param string $varName
      * @param string $default
+     *
      * @return string
      */
-    public function getEnv(string $varName, $default = "") {
+    public function getEnv(string $varName, $default = '')
+    {
         $value = getenv($varName);
 
-        return $value === false ? ($_ENV[$varName] ?? $default) : $value;
+        return false === $value ? ($_ENV[$varName] ?? $default) : $value;
     }
 
     /**
      * @return PhpFileCache
      */
-    public static function getCacheDriver() {
+    public static function getCacheDriver()
+    {
         return new PhpFileCache(
             '/tmp'
         );
