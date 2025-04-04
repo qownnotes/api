@@ -10,6 +10,10 @@ default:
 transferDir := `if [ -d "$HOME/NextcloudPrivate/Transfer" ]; then echo "$HOME/NextcloudPrivate/Transfer"; else echo "$HOME/Nextcloud/Transfer"; fi`
 sessionName := "qownnotes-api"
 
+## Aliases
+
+alias fmt := format
+
 # Open a terminal with the qownnotes-api session
 [group('dev')]
 term:
@@ -46,3 +50,8 @@ just-format:
         echo "Formatting $file"
         just --fmt --unstable -f "$file"
     done
+
+# Format all files
+[group('linter')]
+format args='':
+    nix-shell -p treefmt just nodePackages.prettier nixfmt-rfc-style shfmt statix taplo php83Packages.php-cs-fixer --run "treefmt {{ args }}"
