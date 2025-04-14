@@ -10,8 +10,8 @@ layout {
         focus true
       }
       pane split_direction="horizontal" {
-        pane cwd="docker" command="docker" {
-          args "compose" "up"
+        pane command="devenv" {
+          args "processes" "up"
           start_suspended false
         }
         pane command="composer" {

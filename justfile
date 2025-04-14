@@ -16,7 +16,7 @@ alias fmt := format
 
 # Open a terminal with the qownnotes-api session
 [group('dev')]
-term:
+term: term-kill
     zellij --layout term.kdl attach {{ sessionName }} -c
 
 # Kill the qownnotes-api session
@@ -40,16 +40,6 @@ git-apply-patch:
     echo "transferDir: {{ transferDir }}"
     git diff --no-ext-diff --staged --binary > {{ transferDir }}/{{ sessionName }}.patch
     ls -l1t {{ transferDir }}/ | head -2
-
-# Format all justfiles
-[group('linter')]
-just-format:
-    #!/usr/bin/env bash
-    # Find all files named "justfile" recursively and run just --fmt --unstable on them
-    find . -type f -name "justfile" -print0 | while IFS= read -r -d '' file; do
-        echo "Formatting $file"
-        just --fmt --unstable -f "$file"
-    done
 
 # Format all files
 [group('linter')]
