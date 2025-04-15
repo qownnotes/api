@@ -16,7 +16,8 @@ alias fmt := format
 
 # Open a terminal with the qownnotes-api session
 [group('dev')]
-term: term-kill
+term:
+    -just term-kill
     zellij --layout term.kdl attach {{ sessionName }} -c
 
 # Kill the qownnotes-api session
