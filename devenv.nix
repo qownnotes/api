@@ -1,8 +1,6 @@
 {
   pkgs,
-  lib,
   config,
-  inputs,
   ...
 }:
 
@@ -36,9 +34,6 @@
       file_server
     '';
   };
-
-  # https://devenv.sh/basics/
-  env.GREET = "devenv";
 
   # https://devenv.sh/packages/
   packages = with pkgs; [
