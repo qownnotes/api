@@ -7,7 +7,6 @@
 {
   # https://devenv.sh/supported-languages/php/
   languages.php = {
-    version = "8.3";
     ini = ''
       memory_limit = 256M
     '';

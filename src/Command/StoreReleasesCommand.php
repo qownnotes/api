@@ -6,15 +6,17 @@ namespace App\Command;
 
 use App\Entity\AppRelease;
 use App\Service\ReleaseApi;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'app:store-releases',
+    description: 'Fetches the latest release from GitHub and stores a new app release'
+)]
 class StoreReleasesCommand extends Command
 {
-    // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:store-releases';
-
     /**
      * @var ReleaseApi
      */
@@ -26,14 +28,7 @@ class StoreReleasesCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
-    {
-        $this
-            ->setDescription('Fetches the latest release from GitHub and stores a new app release')
-        ;
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // we'll kill this script after 60 iterations and let supervisord start it again
         // in case it hogged memory
@@ -59,6 +54,6 @@ class StoreReleasesCommand extends Command
             sleep(60);
         }
 
-        exit(0);
+        return Command::SUCCESS;
     }
 }

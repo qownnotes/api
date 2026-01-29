@@ -8,60 +8,36 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- *
- * @ORM\Table(name="app_release")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'app_release')]
 class AppRelease
 {
-    /**
-     * @ORM\Column(type="integer")
-     *
-     * @ORM\Id
-     *
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    protected ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=20)
-     */
-    protected $version;
+    #[ORM\Column(type: 'string', length: 20)]
+    protected string $version;
 
-    /**
-     * @ORM\Column(type="text")
-     */
-    protected $releaseChangesMarkdown;
+    #[ORM\Column(type: 'text')]
+    protected string $releaseChangesMarkdown;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    protected $dateCreated;
-
-    //    /**
-    //     * @ORM\Column(type="integer")
-    //     */
-    //    protected $created;
+    #[ORM\Column(type: 'datetime')]
+    protected \DateTime $dateCreated;
 
     /**
      * Get id.
-     *
-     * @return int
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
     /**
      * Set version.
-     *
-     * @param string $version
-     *
-     * @return AppRelease
      */
-    public function setVersion($version)
+    public function setVersion(string $version): self
     {
         $this->version = $version;
 
@@ -70,22 +46,16 @@ class AppRelease
 
     /**
      * Get version.
-     *
-     * @return string
      */
-    public function getVersion()
+    public function getVersion(): string
     {
         return $this->version;
     }
 
     /**
      * Set releaseChangesMarkdown.
-     *
-     * @param string $releaseChangesMarkdown
-     *
-     * @return AppRelease
      */
-    public function setReleaseChangesMarkdown($releaseChangesMarkdown)
+    public function setReleaseChangesMarkdown(string $releaseChangesMarkdown): self
     {
         $this->releaseChangesMarkdown = $releaseChangesMarkdown;
 
@@ -94,22 +64,16 @@ class AppRelease
 
     /**
      * Get releaseChangesMarkdown.
-     *
-     * @return string
      */
-    public function getReleaseChangesMarkdown()
+    public function getReleaseChangesMarkdown(): string
     {
         return $this->releaseChangesMarkdown;
     }
 
     /**
      * Set dateCreated.
-     *
-     * @param \DateTime $dateCreated
-     *
-     * @return AppRelease
      */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated(\DateTime $dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
@@ -118,34 +82,9 @@ class AppRelease
 
     /**
      * Get dateCreated.
-     *
-     * @return \DateTime
      */
-    public function getDateCreated()
+    public function getDateCreated(): \DateTime
     {
         return $this->dateCreated;
     }
-
-    //    /**
-    //     * Set created
-    //     *
-    //     * @param \integer $created
-    //     * @return AppRelease
-    //     */
-    //    public function setCreated($created)
-    //    {
-    //        $this->created = $created;
-    //
-    //        return $this;
-    //    }
-    //
-    //    /**
-    //     * Get created
-    //     *
-    //     * @return \integer
-    //     */
-    //    public function getCreated()
-    //    {
-    //        return $this->created;
-    //    }
 }

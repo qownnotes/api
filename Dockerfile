@@ -13,7 +13,7 @@ RUN composer dump-env prod
 # continue stage build with the desired image and copy the source including the
 # dependencies downloaded by composer
 # https://dockerfile.readthedocs.io/en/latest/content/DockerImages/dockerfiles/php-apache.html
-FROM webdevops/php-nginx:8.3-alpine
+FROM webdevops/php-nginx:8.4-alpine
 
 USER root
 

@@ -9,6 +9,8 @@ services:
       - ./webserver/nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
       - "127.0.0.1:8000:80"
+    depends_on:
+      - php-fpm
 
   php-fpm:
     environment:
@@ -20,5 +22,5 @@ services:
     working_dir: /application
     volumes:
       - ..:/application
-      - ./php-fpm/php-ini-overrides.ini:/etc/php/8.2/fpm/conf.d/99-overrides.ini
-      - ./php-fpm/php-fpm-overrides.conf:/etc/php/8.2/fpm/pool.d/z-overrides.conf
+      - ./php-fpm/php-ini-overrides.ini:/etc/php/8.4/fpm/conf.d/99-overrides.ini
+      - ./php-fpm/php-fpm-overrides.conf:/etc/php/8.4/fpm/pool.d/z-overrides.conf

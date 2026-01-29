@@ -4,58 +4,30 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 class LatestRelease
 {
-    /**
-     * @Groups({"LatestRelease:output"})
-     *
-     * @var string
-     */
-    private $identifier;
+    #[Groups(['LatestRelease:output'])]
+    private string $identifier;
 
-    /**
-     * @var string
-     *
-     * @Groups({"LatestRelease:output"})
-     */
-    private $url;
+    #[Groups(['LatestRelease:output'])]
+    private string $url;
 
-    /**
-     * @var string
-     *
-     * @Groups({"LatestRelease:output"})
-     */
-    private $version;
+    #[Groups(['LatestRelease:output'])]
+    private string $version;
 
-    /**
-     * @var \DateTime
-     *
-     * @Groups({"LatestRelease:output"})
-     */
-    private $dateCreated;
+    #[Groups(['LatestRelease:output'])]
+    private \DateTime $dateCreated;
 
-    /**
-     * @var string
-     *
-     * @Groups({"LatestRelease:output"})
-     */
-    private $releaseChangesMarkdown;
+    #[Groups(['LatestRelease:output'])]
+    private string $releaseChangesMarkdown;
 
-    /**
-     * @var string
-     *
-     * @Groups({"LatestRelease:output"})
-     */
-    private $releaseChangesHtml;
+    #[Groups(['LatestRelease:output'])]
+    private string $releaseChangesHtml;
 
-    /**
-     * @var bool
-     *
-     * @Groups({"LatestRelease:output"})
-     */
-    private $needUpdate;
+    #[Groups(['LatestRelease:output'])]
+    private bool $needUpdate;
 
     public function setIdentifier(string $identifier): self
     {

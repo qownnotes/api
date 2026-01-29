@@ -402,7 +402,7 @@ class ReleaseApi
         }
 
         try {
-            $matomoTracker->setCustomTrackingParameter('dimension3', $debug);
+            $matomoTracker->setCustomTrackingParameter('dimension3', (string) $debug);
         } catch (\Exception $e) {
         }
 
@@ -430,10 +430,10 @@ class ReleaseApi
 
         try {
             // we want to try to set the _id hash
-            $matomoTracker->setVisitorId($userId);
+            $matomoTracker->setVisitorId((string) $userId);
         } catch (\Exception $e) {
             try {
-                $matomoTracker->setUserId($userId);
+                $matomoTracker->setUserId((string) $userId);
             } catch (\Exception $e) {
             }
         }

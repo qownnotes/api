@@ -39,3 +39,8 @@ git-apply-patch:
     echo "transferDir: {{ transferDir }}"
     git diff --no-ext-diff --staged --binary > {{ transferDir }}/{{ sessionName }}.patch
     ls -l1t {{ transferDir }}/ | head -2
+
+# Open the browser with the app
+[group('dev')]
+open-browser:
+    xdg-open http://localhost:8000
