@@ -7,6 +7,7 @@
 /public/bundles/
 /var/
 /vendor/
+.shared
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###

@@ -1,6 +1,8 @@
 # Use `just <recipe>` to run a recipe
 # https://just.systems/man/en/
 
+import ".shared/common.just"
+
 # By default, run the `--list` command
 default:
     @just --list
@@ -9,10 +11,6 @@ default:
 
 transferDir := `if [ -d "$HOME/NextcloudPrivate/Transfer" ]; then echo "$HOME/NextcloudPrivate/Transfer"; else echo "$HOME/Nextcloud/Transfer"; fi`
 sessionName := "qownnotes-api"
-
-## Aliases
-
-alias fmt := format
 
 # Open a terminal with the qownnotes-api session
 [group('dev')]
@@ -41,8 +39,3 @@ git-apply-patch:
     echo "transferDir: {{ transferDir }}"
     git diff --no-ext-diff --staged --binary > {{ transferDir }}/{{ sessionName }}.patch
     ls -l1t {{ transferDir }}/ | head -2
-
-# Format all files
-[group('linter')]
-format args='':
-    nix-shell -p treefmt just nodePackages.prettier nixfmt-rfc-style shfmt statix taplo php83Packages.php-cs-fixer --run "treefmt {{ args }}"

@@ -7,7 +7,6 @@
 {
   # https://devenv.sh/supported-languages/php/
   languages.php = {
-    enable = true;
     version = "8.3";
     ini = ''
       memory_limit = 256M
@@ -37,25 +36,12 @@
 
   # https://devenv.sh/packages/
   packages = with pkgs; [
-    git
     symfony-cli
     just # task runner
     zellij # smart terminal workspace
     lazygit # git terminal
     fzf # fuzzy finder
-
-    # Packages for treefmt
-    nodePackages.prettier
-    nixfmt-rfc-style
-    shfmt
-    statix
-    taplo
-    php83Packages.php-cs-fixer
   ];
-
-  # https://devenv.sh/git-hooks/
-  # git-hooks.hooks.shellcheck.enable = true;
-  git-hooks.hooks.treefmt.enable = true;
 
   # https://devenv.sh/integrations/dotenv/
   dotenv.enable = true;
