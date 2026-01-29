@@ -1,14 +1,14 @@
 name: "qownnotes-api-prod"
 
 services:
-    web:
-        image: img-qownnotes-api
-        build: .
-        #    container_name: qownnotes-api
-        ports:
-            - "8080:80"
-        volumes:
-            - ./var/app.db:/app/var/app.db
-        environment:
-            - TZ=Europe/Vienna
-            - MATOMO_URL=https://p.qownnotes.org
+  web:
+    image: img-qownnotes-api
+    build: .
+    #    container_name: qownnotes-api
+    ports:
+      - "8080:80"
+    volumes:
+      - ./var/app.db:/app/var/app.db
+    environment:
+      - TZ=Europe/Vienna
+      - MATOMO_URL=https://p.qownnotes.org

@@ -1,75 +1,75 @@
 resources:
-    App\Entity\LatestRelease:
-        operations:
-            ApiPlatform\Metadata\GetCollection:
-                uriTemplate: "/latest_releases"
-                provider: App\ApiPlatform\LatestReleaseProvider
-            ApiPlatform\Metadata\Get:
-                uriTemplate: "/latest_releases/{identifier}"
-                provider: App\ApiPlatform\LatestReleaseProvider
-                openapi:
-                    parameters:
-                        - name: identifier
-                          in: path
-                          description: "Type of release [linux, windows, macos]"
-                          schema:
-                              type: string
-                              enum: [linux, windows, macos]
-                          example: "linux"
-                        - name: version
-                          in: query
-                          description: "Version of the application"
-                          schema:
-                              type: string
-                          example: "24.9.5"
-                        - name: debug
-                          in: query
-                          description: "Debugging release? [0, 1]"
-                          schema:
-                              type: integer
-                              enum: [0, 1]
-                          example: "1"
-                        - name: cid
-                          in: query
-                          description: "Client id"
-                          schema:
-                              type: integer
-                        - name: os
-                          in: query
-                          description: "Operating system"
-                          schema:
-                              type: string
-                        - name: release
-                          in: query
-                          description: "Release type"
-                          schema:
-                              type: string
-                        - name: um
-                          in: query
-                          description: "Update mode"
-                          schema:
-                              type: integer
-        types: ["http://www.qownnotes.org/Release"]
-        description: "Latest release of QOwnNotes"
-        normalizationContext:
-            groups: ["LatestRelease:output"]
-        properties:
-            identifier:
-                identifier: true
-                types: ["http://schema.org/identifier"]
-                openapi:
-                    type: string
-                    enum: [linux, windows, macos]
-                    example: linux
-            url:
-                types: ["https://schema.org/url"]
-            version:
-                types: ["http://schema.org/version"]
-            dateCreated:
-                types: ["http://schema.org/dateCreated"]
-            releaseChangesMarkdown:
-                types: ["http://schema.org/text"]
-            releaseChangesHtml:
-                types: ["http://schema.org/text"]
-            needUpdate:
-                types: ["http://schema.org/Boolean"]
+  App\Entity\LatestRelease:
+    operations:
+      ApiPlatform\Metadata\GetCollection:
+        uriTemplate: "/latest_releases"
+        provider: App\ApiPlatform\LatestReleaseProvider
+      ApiPlatform\Metadata\Get:
+        uriTemplate: "/latest_releases/{identifier}"
+        provider: App\ApiPlatform\LatestReleaseProvider
+        openapi:
+          parameters:
+            - name: identifier
+              in: path
+              description: "Type of release [linux, windows, macos]"
+              schema:
+                type: string
+                enum: [linux, windows, macos]
+              example: "linux"
+            - name: version
+              in: query
+              description: "Version of the application"
+              schema:
+                type: string
+              example: "24.9.5"
+            - name: debug
+              in: query
+              description: "Debugging release? [0, 1]"
+              schema:
+                type: integer
+                enum: [0, 1]
+              example: "1"
+            - name: cid
+              in: query
+              description: "Client id"
+              schema:
+                type: integer
+            - name: os
+              in: query
+              description: "Operating system"
+              schema:
+                type: string
+            - name: release
+              in: query
+              description: "Release type"
+              schema:
+                type: string
+            - name: um
+              in: query
+              description: "Update mode"
+              schema:
+                type: integer
+    types: ["http://www.qownnotes.org/Release"]
+    description: "Latest release of QOwnNotes"
+    normalizationContext:
+      groups: ["LatestRelease:output"]
+    properties:
+      identifier:
+        identifier: true
+        types: ["http://schema.org/identifier"]
+        openapi:
+          type: string
+          enum: [linux, windows, macos]
+          example: linux
+      url:
+        types: ["https://schema.org/url"]
+      version:
+        types: ["http://schema.org/version"]
+      dateCreated:
+        types: ["http://schema.org/dateCreated"]
+      releaseChangesMarkdown:
+        types: ["http://schema.org/text"]
+      releaseChangesHtml:
+        types: ["http://schema.org/text"]
+      needUpdate:
+        types: ["http://schema.org/Boolean"]
