@@ -7,6 +7,8 @@ use App\Entity\LatestRelease;
 
 class LatestReleaseTest extends ApiTestCase
 {
+    protected static ?bool $alwaysBootKernel = true;
+
     public function testGetCollection(): void
     {
         // The client implements Symfony HttpClient's `HttpClientInterface`, and the response `ResponseInterface`
