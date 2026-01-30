@@ -8,7 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Michelf\Markdown;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class AppReleaseRSSFeedController extends AbstractController
 {
@@ -18,12 +18,9 @@ class AppReleaseRSSFeedController extends AbstractController
      * Returns the RSS feed for the app releases.
      *
      * http://api.qownnotes.org/rss/app-releases
-     *
-     * @Route("/rss/app-releases")
-     *
-     * @return Response
      */
-    public function appReleases(ManagerRegistry $doctrine)
+    #[Route('/rss/app-releases')]
+    public function appReleases(ManagerRegistry $doctrine): Response
     {
         $cacheDriver = ReleaseApi::getCacheDriver();
 

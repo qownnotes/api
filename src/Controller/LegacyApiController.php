@@ -6,7 +6,7 @@ use App\Service\ReleaseApi;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class LegacyApiController extends AbstractController
 {
@@ -21,13 +21,10 @@ class LegacyApiController extends AbstractController
     }
 
     /**
-     * @Route("/api/v1/last_release/QOwnNotes/{id}.json")
-     *
-     * @return JsonResponse
-     *
      * @throws \Exception
      */
-    public function lastRelease($id)
+    #[Route('/api/v1/last_release/QOwnNotes/{id}.json')]
+    public function lastRelease($id): JsonResponse
     {
         $version = $this->requestStack->getCurrentRequest()->get('v');
         $updateMode = $this->requestStack->getCurrentRequest()->get('um');
