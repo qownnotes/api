@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\AppRelease;
-use App\Service\ReleaseApi;
 use Doctrine\Persistence\ManagerRegistry;
 use Michelf\Markdown;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,11 +20,11 @@ class AppReleaseRSSFeedController extends AbstractController
      * http://api.qownnotes.org/rss/app-releases
      */
     #[Route('/rss/app-releases')]
-    public function appReleases(ManagerRegistry $doctrine): Response
+    public function appReleases(ManagerRegistry $doctrine, CacheItemPoolInterface $cache): Response
     {
-        $cacheDriver = ReleaseApi::getCacheDriver();
+        $cacheItem = $cache->getItem(self::CACHE_KEY);
 
-        if (!$cacheDriver->contains(self::CACHE_KEY)) {
+        if (!$cacheItem->isHit()) {
             $projectUrl = 'https://www.qownnotes.org';
 
             $xml = new \DOMDocument('1.0', 'UTF-8'); // Create new DOM document.
@@ -117,9 +117,11 @@ class AppReleaseRSSFeedController extends AbstractController
 
             $xmlString = $xml->saveXML();
 
-            $cacheDriver->save(self::CACHE_KEY, $xmlString, 60);
+            $cacheItem->set($xmlString);
+            $cacheItem->expiresAfter(60);
+            $cache->save($cacheItem);
         } else {
-            $xmlString = $cacheDriver->fetch(self::CACHE_KEY);
+            $xmlString = $cacheItem->get();
         }
 
         return new Response($xmlString, 200, ['Content-Type' => 'text/xml']);
