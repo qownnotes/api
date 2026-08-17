@@ -34,21 +34,25 @@ class StoreReleasesCommand extends Command
         // in case it hogged memory
         $killCount = 0;
         while (++$killCount < 60) {
-            $latestRelease = $this->api->fetchLatestRelease('linux');
+            try {
+                $latestRelease = $this->api->fetchLatestRelease('linux');
 
-            $version = $latestRelease->getVersion();
-            $output->writeln("Found version '$version'");
-            $appRelease = $this->api->storeAppReleaseIfNotExists(
-                $version,
-                $latestRelease->getReleaseChangesMarkdown(),
-                $latestRelease->getDateCreated()
-            );
+                $version = $latestRelease->getVersion();
+                $output->writeln("Found version '$version'");
+                $appRelease = $this->api->storeAppReleaseIfNotExists(
+                    $version,
+                    $latestRelease->getReleaseChangesMarkdown(),
+                    $latestRelease->getDateCreated()
+                );
 
-            if ($appRelease instanceof AppRelease) {
-                $id = $appRelease->getId();
-                $output->writeln("A new app release was created (id: $id)");
-            } else {
-                $output->writeln('App release already existed');
+                if ($appRelease instanceof AppRelease) {
+                    $id = $appRelease->getId();
+                    $output->writeln("A new app release was created (id: $id)");
+                } else {
+                    $output->writeln('App release already existed');
+                }
+            } catch (\Throwable $e) {
+                $output->writeln(sprintf('<error>Could not store release: %s</error>', $e->getMessage()));
             }
 
             sleep(60);

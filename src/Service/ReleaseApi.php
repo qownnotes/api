@@ -13,23 +13,21 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
-use Kevinrob\GuzzleCache\CacheMiddleware;
-use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
-use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
 use Michelf\Markdown;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ReleaseApi
 {
     public const RELEASE_CACHE_TTL = 60;
     public const REQUEST_METHOD_GET = 'GET';
-    public const REQUEST_METHOD_HEAD = 'HEAD';
 
     private $clientHandler;
 
@@ -38,10 +36,9 @@ class ReleaseApi
      */
     private $urls;
 
-    /**
-     * @var FilesystemAdapter
-     */
-    private $cachePool;
+    private CacheItemPoolInterface $cachePool;
+
+    private CacheInterface $cache;
 
     private int $cacheTTL;
 
@@ -50,12 +47,16 @@ class ReleaseApi
      */
     private $em;
 
-    public function __construct(EntityManagerInterface $em, CacheItemPoolInterface $cachePool)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        CacheItemPoolInterface $cachePool,
+        CacheInterface $cache,
+    ) {
         $this->em = $em;
         $this->clientHandler = null;
         $this->urls = new ReleaseUrlApi();
         $this->cachePool = $cachePool;
+        $this->cache = $cache;
         $this->cacheTTL = self::RELEASE_CACHE_TTL;
     }
 
@@ -69,34 +70,9 @@ class ReleaseApi
 
     private function getClient(): Client
     {
-        $stack = HandlerStack::create($this->clientHandler);
-
         $client_options = [
-            'handler' => $stack,
+            'handler' => HandlerStack::create($this->clientHandler),
         ];
-
-        return new Client($client_options);
-    }
-
-    private function getReleaseClient(): Client
-    {
-        $stack = HandlerStack::create($this->clientHandler);
-
-        $client_options = [
-            'handler' => $stack,
-        ];
-
-        if (null !== $this->cachePool) {
-            $cacheMiddleWare = new CacheMiddleware(
-                new GreedyCacheStrategy(
-                    new Psr6CacheStorage($this->cachePool),
-                    $this->cacheTTL
-                )
-            );
-
-            $cacheMiddleWare->setHttpMethods([self::REQUEST_METHOD_GET => true, self::REQUEST_METHOD_HEAD => true]);
-            $stack->push($cacheMiddleWare);
-        }
 
         return new Client($client_options);
     }
@@ -225,8 +201,6 @@ class ReleaseApi
 
     public function fetchLatestReleaseJsonData(): array
     {
-        $client = $this->getReleaseClient();
-
         try {
             $url = $this->urls->getReleasesRequestUrl('pbek', 'QOwnNotes');
 
@@ -242,10 +216,11 @@ class ReleaseApi
                 $options['auth'] = [$user, $token];
             }
 
-            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-            $response = $client->request('GET', $url, $options);
-
-            return $this->decodeResponse($response);
+            return $this->fetchCachedGitHubValue(
+                $url,
+                $options,
+                fn (ResponseInterface $response): array => $this->decodeResponse($response),
+            );
         } catch (GuzzleException $e) {
             throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s', $e->getMessage()));
         } catch (\Exception|UriException $e) {
@@ -340,23 +315,57 @@ class ReleaseApi
 
     private function fetchChangeLog($tag): string
     {
-        $client = $this->getReleaseClient();
-
         try {
             $url = $this->urls->getChangeLogUrl($tag);
 
-            // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
-            $response = $client->request('GET', $url);
-
-            return $response->getBody()->getContents();
-        } catch (\Exception|UriException|GuzzleException $e) {
-            if ('main' === $tag) {
-                throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s', $e->getMessage()));
+            return $this->fetchCachedGitHubValue(
+                $url,
+                [],
+                static fn (ResponseInterface $response): string => (string) $response->getBody(),
+            );
+        } catch (RequestException $e) {
+            if ('main' !== $tag && 404 === $e->getResponse()?->getStatusCode()) {
+                // The changelog tag can briefly lag behind the release during publishing.
+                return $this->fetchChangeLog('main');
             }
 
-            // retry with the main branch in case the tag wasn't created yet in the build process
-            return $this->fetchChangeLog('main');
+            throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s', $e->getMessage()));
+        } catch (\Throwable $e) {
+            throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s', $e->getMessage()));
         }
+    }
+
+    /**
+     * Cache fresh GitHub responses briefly while retaining the last successful value.
+     * Symfony's cache callback also locks concurrent refreshes for the same URL.
+     */
+    private function fetchCachedGitHubValue(string $url, array $options, callable $transform): mixed
+    {
+        $keyHash = hash('sha256', $url);
+        $freshKey = 'github_response_'.$keyHash;
+        $fallbackKey = 'github_fallback_'.$keyHash;
+
+        return $this->cache->get($freshKey, function (ItemInterface $item) use ($url, $options, $transform, $fallbackKey) {
+            $item->expiresAfter($this->cacheTTL);
+
+            try {
+                $response = $this->getClient()->request(self::REQUEST_METHOD_GET, $url, $options);
+                $value = $transform($response);
+
+                $fallbackItem = $this->cachePool->getItem($fallbackKey);
+                $fallbackItem->set($value);
+                $this->cachePool->save($fallbackItem);
+
+                return $value;
+            } catch (\Throwable $e) {
+                $fallbackItem = $this->cachePool->getItem($fallbackKey);
+                if ($fallbackItem->isHit()) {
+                    return $fallbackItem->get();
+                }
+
+                throw $e;
+            }
+        });
     }
 
     /**

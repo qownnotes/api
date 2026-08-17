@@ -21,7 +21,7 @@ USER root
 COPY docker.prod/supervisord-qon.conf /opt/docker/etc/supervisor.d/supervisord-qon.conf
 
 USER application
-COPY --chown=application --from=composer /app /app
+COPY --chown=application:application --from=composer /app /app
 
 # create cache dir
 RUN mkdir -p /app/var/cache/prod
