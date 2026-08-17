@@ -11,3 +11,5 @@ docker-compose.yml
 screenshot.png
 tests
 var/app.db
+var/cache
+var/log

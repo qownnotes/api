@@ -61,7 +61,6 @@ class ReleaseApiTest extends TestCase
         $api = new ReleaseApi(
             $this->createMock(EntityManagerInterface::class),
             $cache,
-            $cache,
         );
         $api->setClientHandler($handler);
 

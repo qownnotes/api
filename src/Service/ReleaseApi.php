@@ -50,13 +50,16 @@ class ReleaseApi
     public function __construct(
         EntityManagerInterface $em,
         CacheItemPoolInterface $cachePool,
-        CacheInterface $cache,
     ) {
+        if (!$cachePool instanceof CacheInterface) {
+            throw new \LogicException('The application cache must implement Symfony CacheInterface.');
+        }
+
         $this->em = $em;
         $this->clientHandler = null;
         $this->urls = new ReleaseUrlApi();
         $this->cachePool = $cachePool;
-        $this->cache = $cache;
+        $this->cache = $cachePool;
         $this->cacheTTL = self::RELEASE_CACHE_TTL;
     }
 
