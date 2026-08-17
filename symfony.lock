@@ -119,12 +119,6 @@
     "laminas/laminas-zendframework-bridge": {
         "version": "1.1.1"
     },
-    "league/uri": {
-        "version": "6.3.0"
-    },
-    "league/uri-interfaces": {
-        "version": "2.1.0"
-    },
     "matomo/matomo-php-tracker": {
         "version": "2.0.3"
     },

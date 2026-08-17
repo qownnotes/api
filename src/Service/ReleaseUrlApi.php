@@ -4,35 +4,25 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use League\Uri\Contracts\UriException;
-use League\Uri\UriTemplate;
-
 class ReleaseUrlApi
 {
     /**
      * https://docs.github.com/en/rest/reference/repos#get-the-latest-release.
-     *
-     * @throws UriException
      */
     public function getReleasesRequestUrl(string $owner, string $repo): string
     {
-        $uriTemplate = new UriTemplate('https://api.github.com/repos/{owner}/{repo}/releases/latest');
-
-        return (string) $uriTemplate->expand([
-            'owner' => $owner,
-            'repo' => $repo,
-        ]);
+        return sprintf(
+            'https://api.github.com/repos/%s/%s/releases/latest',
+            rawurlencode($owner),
+            rawurlencode($repo),
+        );
     }
 
-    /**
-     * @throws UriException
-     */
     public function getChangeLogUrl(string $tag): string
     {
-        $uriTemplate = new UriTemplate('https://raw.githubusercontent.com/pbek/QOwnNotes/{tag}/CHANGELOG.md');
-
-        return (string) $uriTemplate->expand([
-            'tag' => $tag,
-        ]);
+        return sprintf(
+            'https://raw.githubusercontent.com/pbek/QOwnNotes/%s/CHANGELOG.md',
+            rawurlencode($tag),
+        );
     }
 }

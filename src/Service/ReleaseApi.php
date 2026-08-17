@@ -15,7 +15,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
-use League\Uri\Contracts\UriException;
 use Michelf\Markdown;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -300,7 +299,7 @@ class ReleaseApi
             );
         } catch (GuzzleException $e) {
             throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s', $e->getMessage()));
-        } catch (\Exception|UriException $e) {
+        } catch (\Exception $e) {
             throw new UnprocessableEntityHttpException(sprintf('Latest release could not be loaded: %s', $e->getMessage()));
         }
     }
