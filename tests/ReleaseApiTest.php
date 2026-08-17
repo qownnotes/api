@@ -12,14 +12,13 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class ReleaseApiTest extends TestCase
 {
     public function testReturnsLastSuccessfulReleaseWhenGitHubIsRateLimited(): void
     {
         $releaseUrl = 'https://api.github.com/repos/pbek/QOwnNotes/releases/latest';
-        $changeLogUrl = 'https://raw.githubusercontent.com/pbek/QOwnNotes/v26.8.4/CHANGELOG.md';
+        $changeLogUrl = 'https://raw.githubusercontent.com/pbek/QOwnNotes/main/CHANGELOG.md';
         $handler = new MockHandler([
             new Response(200, [], $this->releaseJson()),
             new Response(200, [], "## 26.8.4\n\nChanges\n\n## 26.8.3\n\nOlder"),
@@ -41,21 +40,33 @@ class ReleaseApiTest extends TestCase
         self::assertSame('Changes', $releases->first()->getReleaseChangesMarkdown());
     }
 
-    public function testDoesNotRetryRateLimitedChangelogAgainstMainBranch(): void
+    public function testUsesMainChangelogWhenReleaseBodyIsNotUseful(): void
     {
         $handler = new MockHandler([
             new Response(200, [], $this->releaseJson()),
-            new Response(429, [], 'Too Many Requests'),
-            new Response(200, [], 'main branch must not be requested'),
+            new Response(200, [], "## 26.8.4\n\nFallback changes\n\n## 26.8.3\n\nOlder"),
         ]);
         $api = $this->createReleaseApi($handler, new ArrayAdapter());
 
-        try {
-            $api->fetchLatestReleases();
-            self::fail('A rate-limited changelog must fail when no fallback is cached.');
-        } catch (UnprocessableEntityHttpException) {
-            self::assertCount(1, $handler);
-        }
+        $releases = $api->fetchLatestReleases();
+
+        self::assertSame('Fallback changes', $releases->first()->getReleaseChangesMarkdown());
+        self::assertCount(0, $handler);
+    }
+
+    public function testUsesReleaseBodyWithoutFetchingRawChangelog(): void
+    {
+        $handler = new MockHandler([
+            new Response(200, [], $this->releaseJson(
+                "## 26.8.4\n\nBody changes\n\n## Released files\n\n- QOwnNotes.zip",
+            )),
+        ]);
+        $api = $this->createReleaseApi($handler, new ArrayAdapter());
+
+        $releases = $api->fetchLatestReleases();
+
+        self::assertSame('Body changes', $releases->first()->getReleaseChangesMarkdown());
+        self::assertCount(0, $handler);
     }
 
     public function testReturnsStoredReleaseWhenGitHubIsUnavailableAndCacheIsEmpty(): void
@@ -98,10 +109,11 @@ class ReleaseApiTest extends TestCase
         return $api;
     }
 
-    private function releaseJson(): string
+    private function releaseJson(?string $body = null): string
     {
         return json_encode([
             'tag_name' => 'v26.8.4',
+            'body' => $body,
             'assets' => [
                 ['name' => 'QOwnNotes-x86_64.AppImage', 'browser_download_url' => 'https://example.com/linux', 'created_at' => '2026-08-17T12:00:00Z'],
                 ['name' => 'QOwnNotes.zip', 'browser_download_url' => 'https://example.com/windows', 'created_at' => '2026-08-17T12:00:00Z'],

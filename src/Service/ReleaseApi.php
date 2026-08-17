@@ -122,9 +122,12 @@ class ReleaseApi
         $version = $filters['version'] ?? '';
         $needUpdate = version_compare($version, $latestVersion, '<');
 
-        $releaseChangesMarkdown = ('' !== $version && $needUpdate) ?
-            $this->getChangeLogChangesFromGitHubSinceVersion($tagName, $version) :
-            $this->getChangeLogChangesFromGitHubForVersion($tagName, $latestVersion);
+        $releaseChangesMarkdown = $this->getReleaseChangesFromBody($latestReleaseData, $latestVersion);
+        if ('' === $releaseChangesMarkdown) {
+            $releaseChangesMarkdown = ('' !== $version && $needUpdate) ?
+                $this->getChangeLogChangesFromGitHubSinceVersion('main', $version) :
+                $this->getChangeLogChangesFromGitHubForVersion('main', $latestVersion);
+        }
 
         $releaseChangesHtml = Markdown::defaultTransform($releaseChangesMarkdown);
 
@@ -149,6 +152,24 @@ class ReleaseApi
         }
 
         return $collection;
+    }
+
+    private function getReleaseChangesFromBody(array $latestReleaseData, string $latestVersion): string
+    {
+        $body = trim((string) ($latestReleaseData['body'] ?? ''));
+        if ('' === $body) {
+            return '';
+        }
+
+        $matches = [];
+        preg_match(
+            '/(?:\A|\R)##\s+'.preg_quote($latestVersion, '/').'\s*\R+(.*?)(?=\R##\s+|\z)/su',
+            $body,
+            $matches,
+        );
+        $releaseChanges = trim($matches[1] ?? '');
+
+        return '' === trim(strip_tags(Markdown::defaultTransform($releaseChanges))) ? '' : $releaseChanges;
     }
 
     private function fetchLatestReleasesFromDatabase(array $filters): ArrayCollection
