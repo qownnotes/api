@@ -87,6 +87,20 @@ class ReleaseApi
      */
     public function fetchLatestReleases(array $filters = []): ArrayCollection
     {
+        try {
+            return $this->fetchLatestReleasesFromGitHub($filters);
+        } catch (UnprocessableEntityHttpException $e) {
+            $storedReleases = $this->fetchLatestReleasesFromDatabase($filters);
+            if (!$storedReleases->isEmpty()) {
+                return $storedReleases;
+            }
+
+            throw $e;
+        }
+    }
+
+    private function fetchLatestReleasesFromGitHub(array $filters): ArrayCollection
+    {
         /** @var ArrayCollection<int,LatestRelease> $collection */
         $collection = new ArrayCollection();
 
@@ -133,6 +147,66 @@ class ReleaseApi
             $lastRelease->setReleaseChangesHtml($releaseChangesHtml);
             $lastRelease->setNeedUpdate($needUpdate);
             $collection->add($lastRelease);
+        }
+
+        return $collection;
+    }
+
+    private function fetchLatestReleasesFromDatabase(array $filters): ArrayCollection
+    {
+        /** @var AppRelease[] $appReleases */
+        $appReleases = $this->em->getRepository(AppRelease::class)
+            ->findBy([], ['dateCreated' => 'DESC'], 100);
+
+        /** @var ArrayCollection<int,LatestRelease> $collection */
+        $collection = new ArrayCollection();
+        if ([] === $appReleases) {
+            return $collection;
+        }
+
+        $latestRelease = $appReleases[0];
+        $latestVersion = $latestRelease->getVersion();
+        $version = $filters['version'] ?? '';
+        $needUpdate = version_compare($version, $latestVersion, '<');
+        $releaseChangesMarkdown = $latestRelease->getReleaseChangesMarkdown();
+
+        if ('' !== $version && $needUpdate) {
+            $changes = [];
+            foreach ($appReleases as $appRelease) {
+                if (!version_compare($appRelease->getVersion(), $version, '>')) {
+                    break;
+                }
+
+                $changes[] = sprintf(
+                    "## %s\n\n%s",
+                    $appRelease->getVersion(),
+                    $appRelease->getReleaseChangesMarkdown(),
+                );
+            }
+            $releaseChangesMarkdown = implode("\n\n", $changes);
+        }
+
+        $releaseChangesHtml = Markdown::defaultTransform($releaseChangesMarkdown);
+        $assets = [
+            'linux' => 'QOwnNotes-x86_64.AppImage',
+            'windows' => 'QOwnNotes.zip',
+            'macos' => 'QOwnNotes.dmg',
+        ];
+
+        foreach ($assets as $identifier => $assetName) {
+            $release = new LatestRelease();
+            $release->setIdentifier($identifier);
+            $release->setUrl(sprintf(
+                'https://github.com/pbek/QOwnNotes/releases/download/v%s/%s',
+                rawurlencode($latestVersion),
+                rawurlencode($assetName),
+            ));
+            $release->setVersion($latestVersion);
+            $release->setDateCreated($latestRelease->getDateCreated());
+            $release->setReleaseChangesMarkdown($releaseChangesMarkdown);
+            $release->setReleaseChangesHtml($releaseChangesHtml);
+            $release->setNeedUpdate($needUpdate);
+            $collection->add($release);
         }
 
         return $collection;
