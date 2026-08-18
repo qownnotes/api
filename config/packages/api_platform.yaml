@@ -1,6 +1,6 @@
 api_platform:
   title: "QOwnNotes API"
-  version: "1.2.3"
+  version: "1.2.4"
   show_webby: false
 
   # API Platform 4.2 Configuration
