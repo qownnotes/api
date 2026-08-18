@@ -87,7 +87,7 @@ class ReleaseApi
     public function fetchLatestReleases(array $filters = []): ArrayCollection
     {
         try {
-            return $this->fetchLatestReleasesFromGitHub($filters);
+            $latestReleases = $this->fetchLatestReleasesFromGitHub($filters);
         } catch (UnprocessableEntityHttpException $e) {
             $storedReleases = $this->fetchLatestReleasesFromDatabase($filters);
             if (!$storedReleases->isEmpty()) {
@@ -96,6 +96,15 @@ class ReleaseApi
 
             throw $e;
         }
+
+        if ($latestReleases->isEmpty()) {
+            $storedReleases = $this->fetchLatestReleasesFromDatabase($filters);
+            if (!$storedReleases->isEmpty()) {
+                return $storedReleases;
+            }
+        }
+
+        return $latestReleases;
     }
 
     private function fetchLatestReleasesFromGitHub(array $filters): ArrayCollection

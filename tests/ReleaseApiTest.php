@@ -136,6 +136,28 @@ class ReleaseApiTest extends TestCase
         );
     }
 
+    public function testReturnsStoredReleaseWhenGitHubReleaseHasNoPlatformAssets(): void
+    {
+        $handler = new MockHandler([
+            new Response(200, [], $this->releaseJson(
+                "## 26.8.4\n\nChanges\n\n## Released files",
+                [['name' => 'qownnotes-26.8.4.tar.xz', 'browser_download_url' => 'https://example.com/source', 'created_at' => '2026-08-17T12:00:00Z']],
+            )),
+        ]);
+        $storedRelease = (new AppRelease())
+            ->setVersion('26.8.3')
+            ->setReleaseChangesMarkdown('Stored changes')
+            ->setDateCreated(new \DateTime('2026-08-16T12:00:00Z'));
+        $api = $this->createReleaseApi($handler, new ArrayAdapter(), [$storedRelease]);
+
+        $releases = $api->fetchLatestReleases();
+
+        self::assertCount(3, $releases);
+        self::assertSame('26.8.3', $releases->first()->getVersion());
+        self::assertSame('Stored changes', $releases->first()->getReleaseChangesMarkdown());
+        self::assertCount(0, $handler);
+    }
+
     /**
      * @param AppRelease[] $storedReleases
      */
@@ -154,12 +176,12 @@ class ReleaseApiTest extends TestCase
         return $api;
     }
 
-    private function releaseJson(?string $body = null): string
+    private function releaseJson(?string $body = null, ?array $assets = null): string
     {
         return json_encode([
             'tag_name' => 'v26.8.4',
             'body' => $body,
-            'assets' => [
+            'assets' => $assets ?? [
                 ['name' => 'QOwnNotes-x86_64.AppImage', 'browser_download_url' => 'https://example.com/linux', 'created_at' => '2026-08-17T12:00:00Z'],
                 ['name' => 'QOwnNotes.zip', 'browser_download_url' => 'https://example.com/windows', 'created_at' => '2026-08-17T12:00:00Z'],
                 ['name' => 'QOwnNotes.dmg', 'browser_download_url' => 'https://example.com/macos', 'created_at' => '2026-08-17T12:00:00Z'],
