@@ -122,11 +122,13 @@ class ReleaseApi
         $version = $filters['version'] ?? '';
         $needUpdate = version_compare($version, $latestVersion, '<');
 
-        $releaseChangesMarkdown = $this->getReleaseChangesFromBody($latestReleaseData, $latestVersion);
-        if ('' === $releaseChangesMarkdown) {
-            $releaseChangesMarkdown = ('' !== $version && $needUpdate) ?
-                $this->getChangeLogChangesFromGitHubSinceVersion('main', $version) :
-                $this->getChangeLogChangesFromGitHubForVersion('main', $latestVersion);
+        if ('' !== $version && $needUpdate) {
+            $releaseChangesMarkdown = $this->getChangeLogChangesFromGitHubSinceVersion('main', $version);
+        } else {
+            $releaseChangesMarkdown = $this->getReleaseChangesFromBody($latestReleaseData, $latestVersion);
+            if ('' === $releaseChangesMarkdown) {
+                $releaseChangesMarkdown = $this->getChangeLogChangesFromGitHubForVersion('main', $latestVersion);
+            }
         }
 
         $releaseChangesHtml = Markdown::defaultTransform($releaseChangesMarkdown);

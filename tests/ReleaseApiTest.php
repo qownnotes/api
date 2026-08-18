@@ -69,6 +69,25 @@ class ReleaseApiTest extends TestCase
         self::assertCount(0, $handler);
     }
 
+    public function testUsesCumulativeChangelogForOlderClientDespiteReleaseBody(): void
+    {
+        $handler = new MockHandler([
+            new Response(200, [], $this->releaseJson(
+                "## 26.8.4\n\nLatest body changes\n\n## Released files\n\n- QOwnNotes.zip",
+            )),
+            new Response(200, [], "## 26.8.4\n\nLatest changes\n\n## 26.8.3\n\nOlder changes\n\n## 26.8.2\n\nPrevious changes"),
+        ]);
+        $api = $this->createReleaseApi($handler, new ArrayAdapter());
+
+        $releases = $api->fetchLatestReleases(['version' => '26.8.2']);
+
+        self::assertSame(
+            "## 26.8.4\n\nLatest changes\n\n## 26.8.3\n\nOlder changes",
+            $releases->first()->getReleaseChangesMarkdown(),
+        );
+        self::assertCount(0, $handler);
+    }
+
     public function testReturnsStoredReleaseWhenGitHubIsUnavailableAndCacheIsEmpty(): void
     {
         $handler = new MockHandler([
