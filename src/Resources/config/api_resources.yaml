@@ -21,7 +21,7 @@ resources:
               description: "Version of the application"
               schema:
                 type: string
-              example: "24.9.5"
+              example: "26.8.2"
             - name: debug
               in: query
               description: "Debugging release? [0, 1]"
