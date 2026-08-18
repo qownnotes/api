@@ -123,11 +123,11 @@ class ReleaseApi
         $needUpdate = version_compare($version, $latestVersion, '<');
 
         if ('' !== $version && $needUpdate) {
-            $releaseChangesMarkdown = $this->getChangeLogChangesFromGitHubSinceVersion('main', $version);
+            $releaseChangesMarkdown = $this->getChangeLogChangesFromGitHubSinceVersion($tagName, $version);
         } else {
             $releaseChangesMarkdown = $this->getReleaseChangesFromBody($latestReleaseData, $latestVersion);
             if ('' === $releaseChangesMarkdown) {
-                $releaseChangesMarkdown = $this->getChangeLogChangesFromGitHubForVersion('main', $latestVersion);
+                $releaseChangesMarkdown = $this->getChangeLogChangesFromGitHubForVersion($tagName, $latestVersion);
             }
         }
 
@@ -423,9 +423,9 @@ class ReleaseApi
                 static fn (ResponseInterface $response): string => (string) $response->getBody(),
             );
         } catch (RequestException $e) {
-            if ('main' !== $tag && 404 === $e->getResponse()?->getStatusCode()) {
+            if ('release' !== $tag && 404 === $e->getResponse()?->getStatusCode()) {
                 // The changelog tag can briefly lag behind the release during publishing.
-                return $this->fetchChangeLog('main');
+                return $this->fetchChangeLog('release');
             }
 
             throw new UnprocessableEntityHttpException(sprintf('Changelog could not be loaded: %s', $e->getMessage()));

@@ -18,7 +18,7 @@ class ReleaseApiTest extends TestCase
     public function testReturnsLastSuccessfulReleaseWhenGitHubIsRateLimited(): void
     {
         $releaseUrl = 'https://api.github.com/repos/pbek/QOwnNotes/releases/latest';
-        $changeLogUrl = 'https://raw.githubusercontent.com/pbek/QOwnNotes/main/CHANGELOG.md';
+        $changeLogUrl = 'https://raw.githubusercontent.com/pbek/QOwnNotes/v26.8.4/CHANGELOG.md';
         $handler = new MockHandler([
             new Response(200, [], $this->releaseJson()),
             new Response(200, [], "## 26.8.4\n\nChanges\n\n## 26.8.3\n\nOlder"),
@@ -40,7 +40,7 @@ class ReleaseApiTest extends TestCase
         self::assertSame('Changes', $releases->first()->getReleaseChangesMarkdown());
     }
 
-    public function testUsesMainChangelogWhenReleaseBodyIsNotUseful(): void
+    public function testUsesTaggedChangelogWhenReleaseBodyIsNotUseful(): void
     {
         $handler = new MockHandler([
             new Response(200, [], $this->releaseJson()),
@@ -84,6 +84,32 @@ class ReleaseApiTest extends TestCase
         self::assertSame(
             "## 26.8.4\n\nLatest changes\n\n## 26.8.3\n\nOlder changes",
             $releases->first()->getReleaseChangesMarkdown(),
+        );
+        self::assertSame(
+            'https://raw.githubusercontent.com/pbek/QOwnNotes/v26.8.4/CHANGELOG.md',
+            (string) $handler->getLastRequest()->getUri(),
+        );
+        self::assertCount(0, $handler);
+    }
+
+    public function testFallsBackToReleaseBranchWithoutReturningUnreleasedChanges(): void
+    {
+        $handler = new MockHandler([
+            new Response(200, [], $this->releaseJson()),
+            new Response(404, [], 'Not Found'),
+            new Response(200, [], "## 26.8.4\n\nLatest changes\n\n## 26.8.3\n\nOlder changes\n\n## 26.8.2\n\nPrevious changes"),
+        ]);
+        $api = $this->createReleaseApi($handler, new ArrayAdapter());
+
+        $releases = $api->fetchLatestReleases(['version' => '26.8.2']);
+
+        self::assertSame(
+            "## 26.8.4\n\nLatest changes\n\n## 26.8.3\n\nOlder changes",
+            $releases->first()->getReleaseChangesMarkdown(),
+        );
+        self::assertSame(
+            'https://raw.githubusercontent.com/pbek/QOwnNotes/release/CHANGELOG.md',
+            (string) $handler->getLastRequest()->getUri(),
         );
         self::assertCount(0, $handler);
     }
