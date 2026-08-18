@@ -4,6 +4,8 @@ namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\LatestRelease;
+use App\Service\ReleaseApi;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class LatestReleaseTest extends ApiTestCase
 {
@@ -12,7 +14,17 @@ class LatestReleaseTest extends ApiTestCase
     public function testGetCollection(): void
     {
         // The client implements Symfony HttpClient's `HttpClientInterface`, and the response `ResponseInterface`
-        $response = static::createClient()->request('GET', '/latest_releases');
+        $client = static::createClient();
+        $releases = new ArrayCollection([
+            $this->createRelease('linux'),
+            $this->createRelease('windows'),
+            $this->createRelease('macos'),
+        ]);
+        $api = $this->createMock(ReleaseApi::class);
+        $api->expects(self::once())->method('fetchLatestReleases')->willReturn($releases);
+        static::getContainer()->set(ReleaseApi::class, $api);
+
+        $response = $client->request('GET', '/latest_releases');
 
         $this->assertResponseIsSuccessful();
         // Asserts that the returned content type is JSON-LD (the default)
@@ -36,7 +48,12 @@ class LatestReleaseTest extends ApiTestCase
 
     public function testGetItem(): void
     {
-        static::createClient()->request('GET', '/latest_releases/linux');
+        $client = static::createClient();
+        $api = $this->createMock(ReleaseApi::class);
+        $api->expects(self::once())->method('fetchLatestRelease')->with('linux', [])->willReturn($this->createRelease('linux'));
+        static::getContainer()->set(ReleaseApi::class, $api);
+
+        $client->request('GET', '/latest_releases/linux');
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
@@ -46,5 +63,17 @@ class LatestReleaseTest extends ApiTestCase
             // Note: identifier is part of @id in API Platform 4.2
         ]);
         $this->assertMatchesResourceItemJsonSchema(LatestRelease::class);
+    }
+
+    private function createRelease(string $identifier): LatestRelease
+    {
+        return (new LatestRelease())
+            ->setIdentifier($identifier)
+            ->setUrl('https://example.com/QOwnNotes')
+            ->setVersion('26.8.6')
+            ->setDateCreated(new \DateTime('2026-08-18T12:00:00Z'))
+            ->setReleaseChangesMarkdown('Release changes')
+            ->setReleaseChangesHtml('<p>Release changes</p>')
+            ->setNeedUpdate(true);
     }
 }
