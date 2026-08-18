@@ -148,13 +148,46 @@ class ReleaseApiTest extends TestCase
             ->setVersion('26.8.3')
             ->setReleaseChangesMarkdown('Stored changes')
             ->setDateCreated(new \DateTime('2026-08-16T12:00:00Z'));
-        $api = $this->createReleaseApi($handler, new ArrayAdapter(), [$storedRelease]);
+        $storedIncompleteRelease = (new AppRelease())
+            ->setVersion('26.8.4')
+            ->setReleaseChangesMarkdown('Incomplete release changes')
+            ->setDateCreated(new \DateTime('2026-08-17T12:00:00Z'));
+        $api = $this->createReleaseApi($handler, new ArrayAdapter(), [$storedIncompleteRelease, $storedRelease]);
 
         $releases = $api->fetchLatestReleases();
 
         self::assertCount(3, $releases);
         self::assertSame('26.8.3', $releases->first()->getVersion());
         self::assertSame('Stored changes', $releases->first()->getReleaseChangesMarkdown());
+        self::assertCount(0, $handler);
+    }
+
+    public function testFillsMissingGitHubPlatformAssetsFromStoredRelease(): void
+    {
+        $handler = new MockHandler([
+            new Response(200, [], $this->releaseJson(
+                "## 26.8.4\n\nChanges\n\n## Released files",
+                [['name' => 'QOwnNotes-x86_64.AppImage', 'browser_download_url' => 'https://example.com/linux', 'created_at' => '2026-08-17T12:00:00Z']],
+            )),
+        ]);
+        $storedRelease = (new AppRelease())
+            ->setVersion('26.8.3')
+            ->setReleaseChangesMarkdown('Stored changes')
+            ->setDateCreated(new \DateTime('2026-08-16T12:00:00Z'));
+        $api = $this->createReleaseApi($handler, new ArrayAdapter(), [$storedRelease]);
+
+        $releases = $api->fetchLatestReleases();
+
+        $versions = [];
+        foreach ($releases as $release) {
+            $versions[$release->getIdentifier()] = $release->getVersion();
+        }
+
+        self::assertCount(3, $releases);
+        self::assertSame(
+            ['linux' => '26.8.4', 'windows' => '26.8.3', 'macos' => '26.8.3'],
+            $versions,
+        );
         self::assertCount(0, $handler);
     }
 

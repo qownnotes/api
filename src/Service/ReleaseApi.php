@@ -97,10 +97,18 @@ class ReleaseApi
             throw $e;
         }
 
-        if ($latestReleases->isEmpty()) {
-            $storedReleases = $this->fetchLatestReleasesFromDatabase($filters);
-            if (!$storedReleases->isEmpty()) {
-                return $storedReleases;
+        if ($latestReleases->count() < 3) {
+            $latestVersion = substr((string) $this->fetchLatestReleaseJsonData()['tag_name'], 1);
+            $storedReleases = $this->fetchLatestReleasesFromDatabase($filters, $latestVersion);
+            $latestIdentifiers = [];
+            foreach ($latestReleases as $latestRelease) {
+                $latestIdentifiers[$latestRelease->getIdentifier()] = true;
+            }
+
+            foreach ($storedReleases as $storedRelease) {
+                if (!isset($latestIdentifiers[$storedRelease->getIdentifier()])) {
+                    $latestReleases->add($storedRelease);
+                }
             }
         }
 
@@ -183,11 +191,18 @@ class ReleaseApi
         return '' === trim(strip_tags(Markdown::defaultTransform($releaseChanges))) ? '' : $releaseChanges;
     }
 
-    private function fetchLatestReleasesFromDatabase(array $filters): ArrayCollection
+    private function fetchLatestReleasesFromDatabase(array $filters, ?string $beforeVersion = null): ArrayCollection
     {
         /** @var AppRelease[] $appReleases */
         $appReleases = $this->em->getRepository(AppRelease::class)
             ->findBy([], ['dateCreated' => 'DESC'], 100);
+
+        if (null !== $beforeVersion) {
+            $appReleases = array_values(array_filter(
+                $appReleases,
+                static fn (AppRelease $release): bool => version_compare($release->getVersion(), $beforeVersion, '<'),
+            ));
+        }
 
         /** @var ArrayCollection<int,LatestRelease> $collection */
         $collection = new ArrayCollection();
